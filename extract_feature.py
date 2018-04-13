@@ -85,6 +85,8 @@ feature窗提取商品特征
 该广告商品 销量等级/展示次数等级
 该广告商品 销量等级/收藏等级 如果被除数为0，则用0.1替代？
 #某属性的成交率（很麻烦）
+#浏览过该商品的不同用户数量
+#消费过该商品的不同用户数量
 """
 #feature= feature1   
 def extract_merchant_feature(feature):
@@ -94,14 +96,14 @@ def extract_merchant_feature(feature):
 #‘second_caregory’该二级类目下商品的 平均、最大、最小价格等级，销量等级，收藏次数等级，展示次数等级（几个数据集的二级类目相同）
     d=merchant[['second_category','item_price_level','item_sales_level','item_collected_level','item_pv_level']]
     d.replace(-1,0,inplace=True)
-    d=d.groupby('second_category').agg(['mean','max','min']).reset_index()
+    d=round(d.groupby('second_category').agg(['mean','max','min']).reset_index())
     d.columns=['second_category','mean_item_price_level','max_item_price_level','min_item_price_level','mean_item_sales_level','max_item_sales_level','min_item_sales_level','mean_item_collected_level','max_item_collected_level','min_item_collected_level','mean_item_pv_level','max_item_pv_level','min_item_pv_level']
 #‘second_caregory’该二级类目下成功销售的商品的 平均、最大、最小价格等级，销量等级，收藏次数等级，展示次数等级（item_sales_level有缺失值 用0替代的  会影响最小值）   
     d1=merchant[['second_category','item_price_level','item_sales_level','item_collected_level','item_pv_level','is_trade']]
     d1=d1[d1['is_trade']==1]
     d1=d1.drop('is_trade',axis=1)
     d1.replace(-1,0,inplace=True)
-    d1=d1.groupby('second_category').agg(['mean','max','min']).reset_index()
+    d1=round(d1.groupby('second_category').agg(['mean','max','min']).reset_index())
     d1.columns=['second_category','trans_mean_item_price_level','trans_max_item_price_level','trans_min_item_price_level','trans_mean_item_sales_level','trans_max_item_sales_level','trans_min_item_sales_level','trans_mean_item_collected_level','trans_max_item_collected_level','trans_min_item_collected_level','trans_mean_item_pv_level','trans_max_item_pv_level','trans_min_item_pv_level']
 #‘second_caregory’二和一的比
     d3=d[['second_category']]
@@ -232,6 +234,7 @@ def extract_merchant_feature(feature):
     d36['item_collected_price_rate']=d36['item_collected_level']/d36['item_price_level']
     d36=d36[['instance_id','item_collected_price_rate']] 
 #组合起来
+    merchant=merchant.drop(['item_category_list','item_property_list','item_brand_id','item_city_id','is_trade'],axis=1)
     merchant=pd.merge(merchant,d,on='second_category',how='left')
     merchant=pd.merge(merchant,d1,on='second_category',how='left')
     merchant=pd.merge(merchant,d3,on='second_category',how='left')
@@ -282,27 +285,381 @@ def extract_merchant_feature(feature):
 merchant_feature1=extract_merchant_feature(feature1)
 merchant_feature2=extract_merchant_feature(feature2)
 merchant_feature3=extract_merchant_feature(feature3)
- #%%   
+#%%
+"""
+店铺特征：
+"""
+
+#%%   user
+"""
+提取用户信息
+根据用户编号来：
+该用户浏览过的商品数量
+该用户成交了的商品数量
+该用户的商品成交率
+
+该用户浏览过的不同商品数量（item_id）
+该用户消费过的不同商品数量
+该用户消费过的不同商品数量/该用户浏览过的不同商品数量
+
+该用户浏览不同品牌商品数量
+该用户消费过的不同品牌数量
+
+该用户浏览不同城市商品数量
+该用户消费过的不同城市数量
+
+该用户浏览不同价格等级商品数量
+该用户消费的价格的平均等级
+
+该用户浏览不同销量等级商品数量
+该用户消费的销量的平均等级
+
+该用户浏览不同收藏等级商品数量
+该用户消费的商品的收藏的平均的等级
+
+#该用户浏览不同展示次数商品数量
+
+该用户浏览过的商店数量
+该用户成交过的商店数量
+
+该用户浏览不同的店铺数量
+
+该用户消费的店铺的平均评价等级
+该用户消费的店铺的平均好评等级
+该用户消费的店铺的平均星级
+该用户消费的店铺的平均服务态度
+该用户消费的店铺的平均物流服务
+该用户消费的店铺的平均描述相符度
+
+#该用户浏览的店铺的平均好评率
+#该用户浏览的店铺的平均服务态度
+#该用户浏览的店铺的平均物流服务
+#该用户浏览的店铺的平均描述相符度 
+
+不同性别用户
+{
+成交率
+消费商品平均价格等级
+平均销量等级
+平均收藏次数等级
+平均展示次数等级
+消费店铺平均
+评价数量等级
+好评率
+星级
+服务态度评分
+物流服务评分
+描述相符评分 注意除了成交率外 其余没有太大差别没有选用
+}
+不同年龄用户
+{
+}
+不同职业用户
+{
+}
+不同星级用户
+{
+}
+"""    
+feature=feature1
+def extract_user_feature(feature):
+    user=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade']]
+#'user_id' 该用户浏览过的商品数量   
+    d=user[['user_id']]
+    d=d.groupby('user_id').size().reset_index()
+    d.rename(columns={0:'user_look_cnt'},inplace=True)    
+#'user_id' 该用户成交了的商品数量
+    d1=user[['user_id','is_trade']]
+    d1=d1.groupby('user_id').agg('sum').reset_index()
+    d1.rename(columns={'is_trade':'user_buy_cnt'},inplace=True)    
+#'user_id' 用户成交率
+    d2=d1[['user_id']]
+    d2['user_buy_rate']=d1['user_buy_cnt']/d['user_look_cnt']       
+#该用户浏览过的不同商品种类（item_id）
+    d3=user[['user_id','item_id']]
+    d3=d3.drop_duplicates()
+    d3=d3.groupby('user_id').size().reset_index()
+    d3.rename(columns={0:'user_look_dif_merchant_cnt'},inplace=True)         
+#该用户消费过的不同商品种类
+    d4=user[['user_id','item_id','is_trade']]
+    d4=d4.drop_duplicates()
+    d4=d4[['user_id','is_trade']]
+    d4=d4.groupby('user_id').agg('sum').reset_index()
+    d4.rename(columns={'is_trade':'user_buy_dif_merchant_cnt'},inplace=True) 
+#该用户消费过的不同商品种类/该用户浏览过的不同商品种类    
+    d5=d4[['user_id']]
+    d5['user_buy_dif_merchant_rate']=d4['user_buy_dif_merchant_cnt']/d3['user_look_dif_merchant_cnt']   
+#该用户浏览不同品牌商品数量
+    d6=user[['user_id','item_brand_id']]
+    d6=d6.drop_duplicates()
+    d6=d6.groupby('user_id').size().reset_index()
+    d6.rename(columns={0:'user_look_dif_merchant_brand_cnt'},inplace=True)     
+#该用户消费不同品牌商品数量
+    d7=user[['user_id','item_brand_id','is_trade']]
+    d7=d7.drop_duplicates()
+    d7=d7[['user_id','is_trade']]
+    d7=d7.groupby('user_id').agg('sum').reset_index()
+    d7.rename(columns={'is_trade':'user_buy_dif_merchant_brand_cnt'},inplace=True) 
+#该用户不同品牌转换比
+    d8=d7[['user_id']]
+    d8['user_buy_dif_merchant_brand_rate']=d7['user_buy_dif_merchant_brand_cnt']/d6['user_look_dif_merchant_brand_cnt']      
+#该用户浏览不同城市商品 城市种类
+    d9=user[['user_id','item_city_id']]
+    d9=d9.drop_duplicates()
+    d9=d9.groupby('user_id').size().reset_index()
+    d9.rename(columns={0:'user_look_dif_merchant_city_cnt'},inplace=True) 
+#该用户 购买不同城市种类
+    d10=user[['user_id','item_city_id','is_trade']]
+    d10=d10.drop_duplicates()
+    d10=d10[['user_id','is_trade']]
+    d10=d10.groupby('user_id').agg('sum').reset_index()
+    d10.rename(columns={'is_trade':'user_buy_dif_merchant_city_cnt'},inplace=True) 
+#该用户 购买城市 转换比    
+    d11=d10[['user_id']]
+    d11['user_buy_dif_merchant_city_rate']=d10['user_buy_dif_merchant_city_cnt']/d9['user_look_dif_merchant_city_cnt']          
+#该用户浏览不同价格等级商品数量
+    d12=user[['user_id','item_price_level']]
+    d12=d12.drop_duplicates()
+    d12=d12.groupby('user_id').size().reset_index()
+    d12.rename(columns={0:'user_look_dif_merchant_price_cnt'},inplace=True)         
+#该用户消费的价格的不同等级种类
+    d13=user[['user_id','item_price_level','is_trade']]
+    d13=d13.drop_duplicates()
+    d13=d13[['user_id','is_trade']]
+    d13=d13.groupby('user_id').agg('sum').reset_index()
+    d13.rename(columns={'is_trade':'user_buy_dif_merchant_price_cnt'},inplace=True) 
+#该用户浏览过 商品 平均价格等级
+    d14=user[['user_id','item_price_level']]
+    d14=round(d14.groupby('user_id').agg('mean').reset_index())
+    d14.columns=['user_id','user_look_mean_merchant_price_level']   
+#该用户消费的 商品 平均价格等级
+    d15=user[['user_id','item_price_level','is_trade']]
+    d15=d15[d15['is_trade']==1]
+    d15=d15[['user_id','item_price_level']]
+    d15=round(d15.groupby('user_id').agg('mean').reset_index())
+    d15.columns=['user_id','user_buy_mean_merchant_price_level'] 
+    d15=pd.merge(d14[['user_id']],d15,on='user_id',how='left')  
+    d15=d15.fillna(value=-1)    
+#该用户浏览不同销量等级商品数量
+    d16=user[['user_id','item_sales_level']]
+    d16=d16.drop_duplicates()
+    d16=d16.groupby('user_id').size().reset_index()
+    d16.rename(columns={0:'user_look_dif_merchant_sales_cnt'},inplace=True)    
+#该用户消费的销量的不同等级种类    
+    d17=user[['user_id','item_sales_level','is_trade']]
+    d17=d17.drop_duplicates()
+    d17=d17[['user_id','is_trade']]
+    d17=d17.groupby('user_id').agg('sum').reset_index()
+    d17.rename(columns={'is_trade':'user_buy_dif_merchant_sales_cnt'},inplace=True)    
+#该用户浏览过 商品 平均销售等级
+    d18=user[['user_id','item_sales_level']]
+    d18=round(d18.groupby('user_id').agg('mean').reset_index())
+    d18.columns=['user_id','user_look_mean_merchant_sales_level']   
+#该用户消费的 商品 平均销售等级
+    d19=user[['user_id','item_price_level','is_trade']]
+    d19=d19[d19['is_trade']==1]
+    d19=d19[['user_id','item_price_level']]
+    d19=round(d19.groupby('user_id').agg('mean').reset_index())
+    d19.columns=['user_id','user_buy_mean_merchant_sales_level'] 
+    d19=pd.merge(d18[['user_id']],d19,on='user_id',how='left')  
+    d19=d19.fillna(value=-1)    
+#该用户浏览不同收藏等级商品数量
+    d20=user[['user_id','item_collected_level']]
+    d20=d20.drop_duplicates()
+    d20=d20.groupby('user_id').size().reset_index()
+    d20.rename(columns={0:'user_look_dif_merchant_collected_cnt'},inplace=True)    
+#该用户消费的收藏的不同等级种类    
+    d21=user[['user_id','item_collected_level','is_trade']]
+    d21=d21.drop_duplicates()
+    d21=d21[['user_id','is_trade']]
+    d21=d21.groupby('user_id').agg('sum').reset_index()
+    d21.rename(columns={'is_trade':'user_buy_dif_merchant_collected_cnt'},inplace=True)    
+#该用户浏览过 商品 平均收藏等级
+    d22=user[['user_id','item_collected_level']]
+    d22=round(d22.groupby('user_id').agg('mean').reset_index())
+    d22.columns=['user_id','user_look_mean_merchant_collected_level']   
+#该用户消费的 商品 平均收藏等级
+    d23=user[['user_id','item_collected_level','is_trade']]
+    d23=d23[d23['is_trade']==1]
+    d23=d23[['user_id','item_collected_level']]
+    d23=round(d23.groupby('user_id').agg('mean').reset_index())
+    d23.columns=['user_id','user_buy_mean_merchant_collected_level'] 
+    d23=pd.merge(d22[['user_id']],d19,on='user_id',how='left')  
+    d23=d23.fillna(value=-1) 
+#该用户浏览过的商店数量
+    d24=user[['user_id','shop_id']]
+    d24=d24.groupby('user_id').size().reset_index()
+    d24.rename(columns={0:'user_look_shop_cnt'},inplace=True)     
+#用户浏览过的不同 商店种类
+    d25=user[['user_id','shop_id']]
+    d25=d25.drop_duplicates()
+    d25=d25.groupby('user_id').size().reset_index()
+    d25.rename(columns={0:'user_look_dif_shop_cnt'},inplace=True)
+#用户成交过的不同 商店种类    
+    d26=user[['user_id','shop_id','is_trade']]
+    d26=d26.drop_duplicates()
+    d26=d26[['user_id','is_trade']]
+    d26=d26.groupby('user_id').agg('sum').reset_index()
+    d26.rename(columns={'is_trade':'user_buy_dif_shop_cnt'},inplace=True)    
+#该用户消费过的不同商店种类/该用户浏览过的不同商店种类    
+    d27=d26[['user_id']]
+    d27['user_buy_dif_shop_rate']=d26['user_buy_dif_shop_cnt']/d25['user_look_dif_shop_cnt']        
+#该用户浏览不同评价等级
+    d28=user[['user_id','shop_review_num_level']]
+    d28=d28.drop_duplicates()
+    d28=d28.groupby('user_id').size().reset_index()
+    d28.rename(columns={0:'user_look_dif_shop_review_num_level_cnt'},inplace=True)    
+#该用户消费的店铺 不同评价等级种类   
+    d29=user[['user_id','shop_review_num_level','is_trade']]
+    d29=d29.drop_duplicates()
+    d29=d29[['user_id','is_trade']]
+    d29=d29.groupby('user_id').agg('sum').reset_index()
+    d29.rename(columns={'is_trade':'user_buy_dif_shop_review_num_level_cnt'},inplace=True)    
+#该用户浏览过 店铺 平均评价数量等级
+    d30=user[['user_id','shop_review_num_level']]
+    d30=round(d30.groupby('user_id').agg('mean').reset_index())
+    d30.columns=['user_id','user_look_mean_shop_review_num_level']   
+#该用户消费的 商品 平均评价数量等级
+    d31=user[['user_id','shop_review_num_level','is_trade']]
+    d31=d31[d31['is_trade']==1]
+    d31=d31[['user_id','shop_review_num_level']]
+    d31=round(d31.groupby('user_id').agg('mean').reset_index())
+    d31.columns=['user_id','user_buy_mean_shop_review_num_level'] 
+    d31=pd.merge(d30[['user_id']],d31,on='user_id',how='left')  
+    d31=d31.fillna(value=-1)    
+#该用户浏览不同商店 星级
+    d32=user[['user_id','shop_star_level']]
+    d32=d32.drop_duplicates()
+    d32=d32.groupby('user_id').size().reset_index()
+    d32.rename(columns={0:'user_look_dif_shop_star_level_cnt'},inplace=True)    
+#该用户消费的店铺 不同星级种类  
+    d33=user[['user_id','shop_star_level','is_trade']]
+    d33=d33.drop_duplicates()
+    d33=d33[['user_id','is_trade']]
+    d33=d33.groupby('user_id').agg('sum').reset_index()
+    d33.rename(columns={'is_trade':'user_buy_dif_shop_star_level_cnt'},inplace=True)    
+#该用户浏览过 店铺 平均星级
+    d34=user[['user_id','shop_star_level']]
+    d34=round(d34.groupby('user_id').agg('mean').reset_index())
+    d34.columns=['user_id','user_look_mean_shop_star_level']   
+#该用户消费的 店铺 平均星级
+    d35=user[['user_id','shop_star_level','is_trade']]
+    d35=d35[d35['is_trade']==1]
+    d35=d35[['user_id','shop_star_level']]
+    d35=round(d35.groupby('user_id').agg('mean').reset_index())
+    d35.columns=['user_id','user_buy_mean_shop_star_level'] 
+    d35=pd.merge(d34[['user_id']],d35,on='user_id',how='left')  
+    d35=d35.fillna(value=-1)
+#该用户消费的店铺的平均好评率
+    d36=user[['user_id','shop_review_positive_rate','is_trade']]
+    d36=d36[d36['is_trade']==1]
+    d36=d36[['user_id','shop_review_positive_rate']]
+    d36=d36.groupby('user_id').agg('mean').reset_index()
+    d36.columns=['user_id','user_buy_mean_shop_review_positive_rate'] 
+    d36=pd.merge(d34[['user_id']],d36,on='user_id',how='left')  
+    d36=d36.fillna(value=-1)   
+#该用户消费的店铺的平均服务态度
+    d37=user[['user_id','shop_score_service','is_trade']]
+    d37=d37[d37['is_trade']==1]
+    d37=d37[['user_id','shop_score_service']]
+    d37=d37.groupby('user_id').agg('mean').reset_index()
+    d37.columns=['user_id','user_buy_mean_shop_score_service'] 
+    d37=pd.merge(d34[['user_id']],d37,on='user_id',how='left')  
+    d37=d37.fillna(value=-1)      
+#该用户消费的店铺的平均物流服务
+    d38=user[['user_id','shop_score_delivery','is_trade']]
+    d38=d38[d38['is_trade']==1]
+    d38=d38[['user_id','shop_score_delivery']]
+    d38=d38.groupby('user_id').agg('mean').reset_index()
+    d38.columns=['user_id','user_buy_mean_shop_score_delivery'] 
+    d38=pd.merge(d34[['user_id']],d38,on='user_id',how='left')  
+    d38=d38.fillna(value=-1)      
+#该用户消费的店铺的平均描述相符度    
+    d39=user[['user_id','shop_score_description','is_trade']]
+    d39=d39[d39['is_trade']==1]
+    d39=d39[['user_id','shop_score_description']]
+    d39=d39.groupby('user_id').agg('mean').reset_index()
+    d39.columns=['user_id','user_buy_mean_shop_score_description'] 
+    d39=pd.merge(d34[['user_id']],d39,on='user_id',how='left')  
+    d39=d39.fillna(value=-1)      
+# user_gender_id 不同性别用户 成交率
+    d40=user[['user_gender_id','is_trade']]
+    d40['cnt']=1
+    d40=d40.groupby('user_gender_id').agg('sum').reset_index()
+    d40['user_gender_buy_rate']=d40['is_trade']/d40['cnt']
+    d40=d40[['user_gender_id','user_gender_buy_rate']]
+# user_age_level 不同年龄用户  成交率
+    d41=user[['user_age_level','is_trade']]
+    d41['cnt']=1
+    d41=d41.groupby('user_age_level').agg('sum').reset_index()
+    d41['user_age_buy_rate']=d41['is_trade']/d41['cnt']
+    d41=d41[['user_age_level','user_age_buy_rate']]    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    d42=user[['user_age_level','is_trade','shop_score_description']]
+    d42=d42[d42['is_trade']==1][['user_age_level','shop_score_description']]
+    d42=d42.groupby('user_age_level').agg('mean').reset_index()
+    d42.columns=['user_age_level','user_age_buy_mean_shop_score_description']  
+#user_occupation_id 不同职业用户   
+    d43=user[['user_occupation_id','is_trade']]
+    d43['cnt']=1
+    d43=d43.groupby('user_occupation_id').agg('sum').reset_index()
+    d43['user_occupation_buy_rate']=d43['is_trade']/d43['cnt']
+    d43=d43[['user_occupation_id','user_occupation_buy_rate']] 
+#user_star_level 不同星级用户成交率    
+    d44=user[['user_star_level','is_trade']]
+    d44['cnt']=1
+    d44=d44.groupby('user_star_level').agg('sum').reset_index()
+    d44['user_star_buy_rate']=d44['is_trade']/d44['cnt']
+    d44=d44[['user_star_level','user_star_buy_rate']] 
+          
+    user=user.drop(['instance_id','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade'],axis=1)
+    user=pd.merge(user,d,on='user_id',how='left')
+    user=pd.merge(user,d1,on='user_id',how='left')
+    user=pd.merge(user,d2,on='user_id',how='left')
+    user=pd.merge(user,d3,on='user_id',how='left')
+    user=pd.merge(user,d4,on='user_id',how='left')
+    user=pd.merge(user,d5,on='user_id',how='left')
+    user=pd.merge(user,d6,on='user_id',how='left')
+    user=pd.merge(user,d7,on='user_id',how='left')
+    user=pd.merge(user,d8,on='user_id',how='left')
+    user=pd.merge(user,d9,on='user_id',how='left')
+    user=pd.merge(user,d10,on='user_id',how='left')
+    user=pd.merge(user,d11,on='user_id',how='left')
+    user=pd.merge(user,d12,on='user_id',how='left')
+    user=pd.merge(user,d13,on='user_id',how='left')
+    user=pd.merge(user,d14,on='user_id',how='left')
+    user=pd.merge(user,d15,on='user_id',how='left')
+    user=pd.merge(user,d16,on='user_id',how='left')
+    user=pd.merge(user,d17,on='user_id',how='left')
+    user=pd.merge(user,d18,on='user_id',how='left')
+    user=pd.merge(user,d19,on='user_id',how='left')
+    user=pd.merge(user,d20,on='user_id',how='left')
+    user=pd.merge(user,d21,on='user_id',how='left')
+    user=pd.merge(user,d22,on='user_id',how='left')
+    user=pd.merge(user,d23,on='user_id',how='left')
+    user=pd.merge(user,d24,on='user_id',how='left')
+    user=pd.merge(user,d25,on='user_id',how='left')
+    user=pd.merge(user,d26,on='user_id',how='left')
+    user=pd.merge(user,d27,on='user_id',how='left')
+    user=pd.merge(user,d28,on='user_id',how='left')
+    user=pd.merge(user,d29,on='user_id',how='left')
+    user=pd.merge(user,d30,on='user_id',how='left')
+    user=pd.merge(user,d31,on='user_id',how='left')
+    user=pd.merge(user,d32,on='user_id',how='left')
+    user=pd.merge(user,d33,on='user_id',how='left')
+    user=pd.merge(user,d34,on='user_id',how='left')
+    user=pd.merge(user,d35,on='user_id',how='left')
+    user=pd.merge(user,d36,on='user_id',how='left')
+    user=pd.merge(user,d37,on='user_id',how='left')
+    user=pd.merge(user,d38,on='user_id',how='left')
+    user=pd.merge(user,d39,on='user_id',how='left')
+   
+    user=pd.merge(user,d40,on='user_gender_id',how='left')
+    user=pd.merge(user,d41,on='user_age_id',how='left')
+    user=pd.merge(user,d42,on='user_age_id',how='left')
+    user=pd.merge(user,d43,on='user_occupation_id',how='left')
+    user=pd.merge(user,d44,on='user_star_level',how='left')
+    return user
     
     
     

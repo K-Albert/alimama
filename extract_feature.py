@@ -285,11 +285,6 @@ def extract_merchant_feature(feature):
 merchant_feature1=extract_merchant_feature(feature1)
 merchant_feature2=extract_merchant_feature(feature2)
 merchant_feature3=extract_merchant_feature(feature3)
-#%%
-"""
-店铺特征：
-"""
-
 #%%   user
 """
 提取用户信息
@@ -352,16 +347,10 @@ merchant_feature3=extract_merchant_feature(feature3)
 描述相符评分 注意除了成交率外 其余没有太大差别没有选用
 }
 不同年龄用户
-{
-}
 不同职业用户
-{
-}
 不同星级用户
-{
-}
 """    
-feature=feature1
+#feature=feature1
 def extract_user_feature(feature):
     user=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade']]
 #'user_id' 该用户浏览过的商品数量   
@@ -655,26 +644,184 @@ def extract_user_feature(feature):
     user=pd.merge(user,d39,on='user_id',how='left')
    
     user=pd.merge(user,d40,on='user_gender_id',how='left')
-    user=pd.merge(user,d41,on='user_age_id',how='left')
-    user=pd.merge(user,d42,on='user_age_id',how='left')
+    user=pd.merge(user,d41,on='user_age_level',how='left')
+    user=pd.merge(user,d42,on='user_age_level',how='left')
     user=pd.merge(user,d43,on='user_occupation_id',how='left')
     user=pd.merge(user,d44,on='user_star_level',how='left')
     return user
+#%%
+user1=  extract_user_feature(feature1)  
+user2=  extract_user_feature(feature2)    
+user3=  extract_user_feature(feature3)    
+#%%    shop
+"""
+店铺特征：
+店铺被浏览册数
+店铺被消费 次数
+店铺消费 次数/店铺浏览次数
+店铺 浏览的 不同用户数
+店铺 消费的 不同用户
+店铺 商品 种类数
+店铺 消费的商品 种类数
+
+该店铺的商品平均商品价格等级
+该店铺的商品平均销量等级
+该店铺的商品平均收藏次数
+
+不同评价数量等级的店铺 的 消费率
+不同星级店铺的 消费率
+
+店铺的评价数量等级
+店铺的星级编号
+店铺的好评率
+店铺的服务态度评分
+店铺的物流服务评分
+店铺的描述相符评分
+"""
+#feature=feature1
+def extract_shop_feature(feature):
+    shop=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade']]
+#店铺被浏览次数
+    d=shop[['shop_id']]
+    d=d.groupby('shop_id').size().reset_index()
+    d.rename(columns={0:'shop_look_cnt'},inplace=True)
+#店铺被消费次数
+    d1=shop[['shop_id','is_trade']]
+    d1=d1.groupby('shop_id').agg('sum').reset_index()
+    d1.rename(columns={'is_trade':'shop_buy_cnt'},inplace=True)    
+#店铺消费 次数/店铺浏览次数
+    d2=d1[['shop_id']]
+    d2['shop_buy_rate']=d1['shop_buy_cnt']/d['shop_look_cnt']    
+#该店铺浏览的用户数
+    d3=shop[['shop_id','user_id']]
+    d3=d3.drop_duplicates()
+    d3=d3.groupby('shop_id').size().reset_index()
+    d3.rename(columns={0:'shop_user_look_cnt'},inplace=True)    
+#该店铺消费的不同用户数
+    d4=shop[['shop_id','user_id','is_trade']]
+    d4=d4.drop_duplicates()
+    d4=d4[['shop_id','is_trade']]
+    d4=d4.groupby('shop_id').agg('sum').reset_index()
+    d4.rename(columns={'is_trade':'shop_user_buy_cnt'},inplace=True)
+#  该店铺消费的不同用户数/ 该店铺浏览的用户数
+    d5=d4[['shop_id']]
+    d5['shop_user_buy_rate']=d4['shop_user_buy_cnt']/d3['shop_user_look_cnt']
+# 该店铺不同商品种类数
+    d6=shop[['shop_id','item_id']]
+    d6=d6.drop_duplicates()
+    d6=d6.groupby('shop_id').size().reset_index()
+    d6.rename(columns={0:'shop_item_cnt'},inplace=True)    
+#该店铺被消费的商品种类数    
+    d7=shop[['shop_id','item_id','is_trade']]
+    d7=d7.drop_duplicates()
+    d7=d7[['shop_id','is_trade']]
+    d7=d7.groupby('shop_id').agg('sum').reset_index()
+    d7.rename(columns={'is_trade':'shop_item_buy_cnt'},inplace=True)    
+#   该店铺被消费的商品种类数 / 该店铺不同商品种类数
+    d8=d4[['shop_id']]
+    d8['shop_item_buy_rate']=d7['shop_item_buy_cnt']/d6['shop_item_cnt']    
+# 该店铺的商品平均商品价格等级
+    d9=shop[['shop_id','item_price_level']]
+    d9=round(d9.groupby('shop_id').agg('mean').reset_index())
+    d9.rename(columns={'item_price_level':'shop_item_mean_item_price_level'},inplace=True)        
+#该店铺销售的商品的平均价格等级    
+    d10=shop[['shop_id','item_price_level','is_trade']]
+    d10=d10[d10['is_trade']==1][['shop_id','item_price_level']]    
+    d10=round(d10.groupby('shop_id').agg('mean').reset_index())
+    d10.rename(columns={'item_price_level':'shop_item_buy_mean_item_price_level'},inplace=True)    
+    d10=pd.merge(d9[['shop_id']],d10,on='shop_id',how='left')  
+    d10=d10.fillna(value=-1)   
+#该店铺的商品平均销量等级
+    d11=shop[['shop_id','item_sales_level']]
+    d11=round(d11.groupby('shop_id').agg('mean').reset_index())
+    d11.rename(columns={'item_sales_level':'shop_item_mean_item_sales_level'},inplace=True)
+#该店铺销售的商品平均销量等级
+    d12=shop[['shop_id','item_sales_level','is_trade']]
+    d12=d12[d12['is_trade']==1][['shop_id','item_sales_level']]    
+    d12=round(d12.groupby('shop_id').agg('mean').reset_index())
+    d12.rename(columns={'item_sales_level':'shop_item_buy_mean_item_sales_level'},inplace=True)    
+    d12=pd.merge(d9[['shop_id']],d12,on='shop_id',how='left')  
+    d12=d12.fillna(value=-1)       
+#该店铺的商品平均收藏次数    
+    d13=shop[['shop_id','item_collected_level']]
+    d13=round(d13.groupby('shop_id').agg('mean').reset_index())
+    d13.rename(columns={'item_collected_level':'shop_item_mean_item_collected_level'},inplace=True)
+#该店铺销售的商品平均收藏次数
+    d14=shop[['shop_id','item_collected_level','is_trade']]
+    d14=d14[d14['is_trade']==1][['shop_id','item_collected_level']]    
+    d14=round(d14.groupby('shop_id').agg('mean').reset_index())
+    d14.rename(columns={'item_collected_level':'shop_item_buy_mean_item_collected_level'},inplace=True)    
+    d14=pd.merge(d9[['shop_id']],d14,on='shop_id',how='left')  
+    d14=d14.fillna(value=-1)     
+#该店铺的商品被展示次数
+    d15=shop[['shop_id','item_pv_level']]
+    d15=round(d15.groupby('shop_id').agg('mean').reset_index())
+    d15.rename(columns={'item_pv_level':'shop_item_mean_item_pv_level'},inplace=True)
+#该店铺销售的商品被展示次数
+    d16=shop[['shop_id','item_pv_level','is_trade']]
+    d16=d16[d16['is_trade']==1][['shop_id','item_pv_level']]    
+    d16=round(d16.groupby('shop_id').agg('mean').reset_index())
+    d16.rename(columns={'item_pv_level':'shop_item_buy_mean_item_pv_level'},inplace=True)    
+    d16=pd.merge(d9[['shop_id']],d16,on='shop_id',how='left')  
+    d16=d16.fillna(value=-1) 
+#shop_review_num_level 不同评价数量等级的店铺 的 消费率
+    d17=shop[['shop_review_num_level','is_trade']]
+    d17['cnt']=1
+    d17=d17.groupby('shop_review_num_level').agg('sum').reset_index()
+    d17['shop_review_num_level_buy_rate']=d17['is_trade']/d17['cnt']
+    d17=d17[['shop_review_num_level','shop_review_num_level_buy_rate']]
+# shop_star_level 不同星级店铺的 消费率
+    d18=shop[['shop_star_level','is_trade']]
+    d18['cnt']=1
+    d18=d18.groupby('shop_star_level').agg('sum').reset_index()
+    d18['shop_star_level_buy_rate']=d18['is_trade']/d18['cnt']
+    d18=d18[['shop_star_level','shop_star_level_buy_rate']]
+#好评数 = 好评率*评价数量等级
+    d19=shop[['shop_id','shop_review_positive_rate','shop_review_num_level']]
+    d19['shop_positive_num']=d19['shop_review_positive_rate']*d19['shop_review_num_level']
+    d19=d19[['shop_id','shop_positive_num']]
     
+    shop=shop.drop(['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','is_trade'],axis=1)
+    shop=pd.merge(shop,d,on='shop_id',how='left')
+    shop=pd.merge(shop,d1,on='shop_id',how='left')
+    shop=pd.merge(shop,d2,on='shop_id',how='left')
+    shop=pd.merge(shop,d3,on='shop_id',how='left')
+    shop=pd.merge(shop,d4,on='shop_id',how='left')
+    shop=pd.merge(shop,d5,on='shop_id',how='left')
+    shop=pd.merge(shop,d6,on='shop_id',how='left')
+    shop=pd.merge(shop,d7,on='shop_id',how='left')
+    shop=pd.merge(shop,d8,on='shop_id',how='left')
+    shop=pd.merge(shop,d9,on='shop_id',how='left')
+    shop=pd.merge(shop,d10,on='shop_id',how='left')
+    shop=pd.merge(shop,d11,on='shop_id',how='left')
+    shop=pd.merge(shop,d12,on='shop_id',how='left')
+    shop=pd.merge(shop,d13,on='shop_id',how='left')
+    shop=pd.merge(shop,d14,on='shop_id',how='left')
+    shop=pd.merge(shop,d15,on='shop_id',how='left')
+    shop=pd.merge(shop,d16,on='shop_id',how='left')
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    shop=pd.merge(shop,d17,on='shop_review_num_level',how='left')
+    shop=pd.merge(shop,d18,on='shop_star_level',how='left')
+    shop['shop_positive_num']=shop['shop_review_positive_rate']*shop['shop_review_num_level']
+    #shop=pd.merge(shop,d19,on='shop_id',how='left')
+    return shop
+#%%
+shop_feature1=extract_shop_feature(feature1)
+shop_feature2=extract_shop_feature(feature2)
+shop_feature3=extract_shop_feature(feature3)
+#%%
+"""
+从label窗提取的特征
+
+"""
+dataset=dataset1
+
+
+
+
+
+
+
+
+
+

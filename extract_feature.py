@@ -24,13 +24,67 @@ def time2cov(time_):
     :return:
     '''
     return time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time_))
+def splitPredicCategory(s):
+    s=s.split(';')
+    category_list=[]
+    for i in s:
+        category_list.append(i.split(':')[0])
+    category= ';'.join(category_list)
+    return category
+def splitPredicProperty(s):
+    s=s.split(';')
+    property_list=[]
+    a=1
+    for i in s:
+        property_split=i.split(':')
+        if len(property_split)==1:
+            a=1
+        else:
+            property_list.append(property_split[1])
+    property= ','.join(property_list) 
+    return property
+def predictPropertyRight(s):
+    s=s.split(':')
+    s1=s[0].split(';')
+    s2=s[1].split(',')
+    property_num=len(s1)
+    predict_right_num=0
+    for i in s2:
+        if i in s1:
+            predict_right_num=predict_right_num+1
+    return predict_right_num/property_num
+def predictCategoryRight(s):
+    s=s.split(':')
+    s1=s[0].split(';')
+    s2=s[1].split(';')
+    category_num=len(s1)
+    predict_right_num=0
+    for i in s2:
+        if i in s1:
+            predict_right_num=predict_right_num+1
+    return predict_right_num/category_num   
+def predictPropertyRightNum(s):
+    s=s.split(':')
+    s1=s[0].split(';')
+    s2=s[1].split(',')
+    property_num=len(s1)
+    predict_right_num=0
+    for i in s2:
+        if i in s1:
+            predict_right_num=predict_right_num+1
+    return predict_right_num
+
 train['real_time'] = pd.to_datetime(train['context_timestamp'].apply(time2cov))
 train['real_hour'] = train['real_time'].dt.hour
 train['real_day'] = train['real_time'].dt.day
+train['perdict_category']=train['predict_category_property'].apply(splitPredicCategory)
+train['perdict_property']=train['predict_category_property'].apply(splitPredicProperty)
 
 test_a['real_time'] = pd.to_datetime(test_a['context_timestamp'].apply(time2cov))
 test_a['real_hour'] = test_a['real_time'].dt.hour
 test_a['real_day'] = test_a['real_time'].dt.day
+test_a['perdict_category']=test_a['predict_category_property'].apply(splitPredicCategory)
+test_a['perdict_property']=test_a['predict_category_property'].apply(splitPredicProperty)
 #18 19 20 21 22
 feature1=train[train['real_day']<23]
 dataset1=train[train['real_day']==23]
@@ -90,7 +144,7 @@ feature窗提取商品特征
 """
 #feature= feature1   
 def extract_merchant_feature(feature):
-    merchant=feature[['instance_id','item_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','is_trade']]
+    merchant=feature[['instance_id','item_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade']]
     merchant['second_category']=merchant['item_category_list'].apply(splitItemCategory_second)  
     merchant['item_property_cnt']=merchant.item_property_list.apply(itemPropertyCnt)     
 #‘second_caregory’该二级类目下商品的 平均、最大、最小价格等级，销量等级，收藏次数等级，展示次数等级（几个数据集的二级类目相同）
@@ -232,7 +286,12 @@ def extract_merchant_feature(feature):
 #instance_id 该广告商品收藏等级/价格等级
     d36=merchant[['instance_id','item_collected_level','item_price_level']]
     d36['item_collected_price_rate']=d36['item_collected_level']/d36['item_price_level']
-    d36=d36[['instance_id','item_collected_price_rate']] 
+    d36=d36[['instance_id','item_collected_price_rate']]
+#消费过该商家的不同用户个数
+    d37=merchant[['item_id','user_id']]
+    d37=d37.drop_duplicates()[['item_id']]
+    d37=d37.groupby('item_id').size.reset_index()
+    d37.rename(columns={0:'merchant_dif_user_buy'},inplace=True)
 #组合起来
     merchant=pd.merge(merchant,d,on='second_category',how='left')
     merchant=pd.merge(merchant,d1,on='second_category',how='left')
@@ -279,7 +338,9 @@ def extract_merchant_feature(feature):
     merchant=pd.merge(merchant,d34,on='instance_id',how='left')
     merchant=pd.merge(merchant,d35,on='instance_id',how='left')
     merchant=pd.merge(merchant,d36,on='instance_id',how='left')
-    merchant=merchant.drop(['instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','is_trade'],axis=1)
+    merchant=pd.merge(merchant,d37,on='item_id',how='left')
+#    merchant=pd.merge(merchant,d38,on='instance_id',how='left')    
+    merchant=merchant.drop(['instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','is_trade','user_id','predict_category','predict_property','predict_category_property'],axis=1)
     merchant=merchant.drop_duplicates()
     return merchant
 #%%
@@ -350,10 +411,13 @@ merchant_feature3=extract_merchant_feature(feature3)
 不同年龄用户
 不同职业用户
 不同星级用户
+
+用户活跃时间 
+
 """    
 #feature=feature1
 def extract_user_feature(feature):
-    user=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade']]
+    user=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade','real_hour']]
 #'user_id' 该用户浏览过的商品数量   
     d=user[['user_id']]
     d=d.groupby('user_id').size().reset_index()
@@ -601,8 +665,18 @@ def extract_user_feature(feature):
     d44=d44.groupby('user_star_level').agg('sum').reset_index()
     d44['user_star_buy_rate']=d44['is_trade']/d44['cnt']
     d44=d44[['user_star_level','user_star_buy_rate']] 
-          
-    user=user.drop(['instance_id','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade'],axis=1)
+    def sortFrequest(x):
+       x=x.groupby('real_hour').size().reset_index() 
+       x.rename(columns={0:'cnt'},inplace=True)
+       x.sort_values(by = ['cnt'],axis = 0,ascending = False).reset_index(drop=True) 
+       max_val=x['real_hour'][0]
+       return max_val
+        
+    d45=user[['user_id','real_hour']]
+    d45=d45.groupby('user_id').apply(sortFrequest).reset_index()
+    d45.rename(columns={0:'user_buy_frequest_hour'},inplace=True)
+    
+    user=user.drop(['real_hour','instance_id','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade'],axis=1)
     user=pd.merge(user,d,on='user_id',how='left')
     user=pd.merge(user,d1,on='user_id',how='left')
     user=pd.merge(user,d2,on='user_id',how='left')
@@ -649,11 +723,13 @@ def extract_user_feature(feature):
     user=pd.merge(user,d42,on='user_age_level',how='left')
     user=pd.merge(user,d43,on='user_occupation_id',how='left')
     user=pd.merge(user,d44,on='user_star_level',how='left')
+    user=pd.merge(user,d45,on='user_id',how='left')
     return user
 #%%
 user1=  extract_user_feature(feature1)  
 user2=  extract_user_feature(feature2)    
 user3=  extract_user_feature(feature3)    
+user1.to_csv('data/user1.csv',index=None)
 #%%    shop
 """
 店铺特征：
@@ -815,21 +891,121 @@ shop_feature3=extract_shop_feature(feature3)
 从label窗提取的特征
 当天用户：
 当天用户浏览的商品数量
-当天用户浏览的商家数量
+当天用户浏览的不同的商品数量
+当天用户浏览的不同商家数量
+
 当天用户浏览的商品平均-----
+#当天用户浏览的商家平均————
+当天商铺被浏览次数
 
-当天商铺
-当天商品
+当天商品被浏览次数
+
+用户在不同页的浏览次数
+
+计算属性正确率
 """
-dataset=dataset1
+#dataset=dataset1
 def extract_other_feature(dataset):
-    other=dataset[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description']]
-
-
-
-
-
-
-
+    other=dataset[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','real_hour','context_page_id','perdict_category','item_category_list','perdict_property','item_property_list']]
+#当天用户浏览的商品数量
+    d=other[['user_id']]
+    d=d.groupby('user_id').size().reset_index()
+    d.rename(columns={0:'label_user_look_cnt'},inplace=True)    
+#当天用户浏览的不同的商品数量
+    d1=other[['user_id','item_id']]
+    d1=d1.drop_duplicates()
+    d1=d1[['user_id']]
+    d1=d1.groupby('user_id').size().reset_index()
+    d1.rename(columns={0:'label_user_look_dif_item'},inplace=True)
+#当天用户浏览的不同的商家种类
+    d2=other[['user_id','shop_id']]
+    d2=d2.drop_duplicates()
+    d2=d2[['user_id']].groupby('user_id').size().reset_index()
+    d2.rename(columns={0:'label_look_dif_shop'},inplace=True) 
+#用户当天浏览的商品的平均价格等级
+    d3=other[['user_id','item_price_level']]
+    d3=round(d3.groupby('user_id').agg('mean').reset_index())
+    d3.rename(columns={'item_price_level':'label_user_look_mean_item_price_level'})
+#用户当天浏览的商品的平均销量等级
+    d4=other[['user_id','item_sales_level']]
+    d4=round(d4.groupby('user_id').agg('mean').reset_index())
+    d4.rename(columns={'item_sales_level':'label_user_look_mean_item_sales_level'})
+#用户当天浏览的商品的平均收藏次数
+    d5=other[['user_id','item_collected_level']]
+    d5=round(d5.groupby('user_id').agg('mean').reset_index())
+    d5.rename(columns={'item_collected_level':'label_user_look_mean_item_collected_level'})
+#当天店铺被浏览册数  
+    d6=other[['shop_id']]
+    d6=d6.groupby('shop_id').size().reset_index()
+    d6.rename(columns={0:'label_shop_look_cnt'},inplace=True) 
+#当天商品被浏览次数      
+    d7=other[['item_id']]
+    d7=d7.groupby('item_id').size().reset_index()
+    d7.rename(columns={0:'label_item_look_cnt'},inplace=True) 
+#不同页被浏览次数 
+    d8=other[['context_page_id']]
+    d8=d8.groupby('context_page_id').size().reset_index()
+    d8.rename(columns={0:'label_context_page_id_look_cnt'},inplace=True)
+#类别预测与商品的吻合度
+    d9=other[['instance_id','perdict_category','item_category_list']]
+    d9['label_predict_category_right_ratio']=d9['item_category_list'].astype('str')+':'+d9['perdict_category'].astype('str')
+    d9['label_predict_category_right_ratio']=d9['label_predict_category_right_ratio'].apply(predictCategoryRight)
+    d9=d9[['instance_id','label_predict_category_right_ratio']]
+#属性预测吻合度
+    d10=other[['instance_id','perdict_property','item_property_list']]
+    d10['label_predict_property_right_ratio']=d10['item_property_list'].astype('str')+':'+d10['perdict_property'].astype('str')
+    d10['label_predict_property_right_ratio']=d10['label_predict_property_right_ratio'].apply(predictPropertyRight)
+    d10=d10[['instance_id','label_predict_property_right_ratio']]    
+#属性符合个数
+    d11=other[['instance_id','perdict_property','item_property_list']]
+    d11['label_predict_property_right_num']=d11['item_property_list'].astype('str')+':'+d11['perdict_property'].astype('str')
+    d11['label_predict_property_right_num']=d11['label_predict_property_right_num'].apply(predictPropertyRightNum)
+    d11=d11[['instance_id','label_predict_property_right_num']]   
+   
+    other=pd.merge(other,d,on='user_id',how='left')
+    other=pd.merge(other,d1,on='user_id',how='left')
+    other=pd.merge(other,d2,on='user_id',how='left')
+    other=pd.merge(other,d3,on='user_id',how='left')
+    other=pd.merge(other,d4,on='user_id',how='left')
+    other=pd.merge(other,d5,on='user_id',how='left')
+    other=pd.merge(other,d6,on='shop_id',how='left')
+    other=pd.merge(other,d7,on='item_id',how='left')
+    other=pd.merge(other,d8,on='context_page_id',how='left')
+    other=pd.merge(other,d9,on='instance_id',how='left')
+    other=pd.merge(other,d10,on='instance_id',how='left')
+    other=other.drop(['instance_id','item_brand_id','item_city_id','perdict_category','item_category_list','perdict_property','item_property_list'],axis=1)
+    return other
+#%%
+other1= extract_other_feature(dataset1)
+other2= extract_other_feature(dataset2)
+other3= extract_other_feature(dataset3)
+#%%
+"""
+用户——商品
+用户——商品城市 购买转化率
+用户——商品品牌 购买转化率
+用户——商品价格等级 购买转化率
+用户——商品销量等级 购买转化率
+用户——商品收藏此书 购买转化率
+用户——商品展示次数 购买转化率
+"""
+def extract_user_merchant_feature(dataset):
+#%%
+"""
+用户——商店
+用户——商店评价数量等级 购买转化率
+用户——商店星级  购买转化率
+用户——商店 好评数（需要计算） 购买转化率
+"""
+def extract_user_shop_feature(dataset):
+#%%
+"""
+上下文信息
+预测的类目属性列表中正确率
+正确个数
+不同正确个数的购买转化率
+不同页的购买转化率
+"""
+def extract_context_feature(dataset):
 
 

@@ -234,7 +234,6 @@ def extract_merchant_feature(feature):
     d36['item_collected_price_rate']=d36['item_collected_level']/d36['item_price_level']
     d36=d36[['instance_id','item_collected_price_rate']] 
 #组合起来
-    merchant=merchant.drop(['item_category_list','item_property_list','item_brand_id','item_city_id','is_trade'],axis=1)
     merchant=pd.merge(merchant,d,on='second_category',how='left')
     merchant=pd.merge(merchant,d1,on='second_category',how='left')
     merchant=pd.merge(merchant,d3,on='second_category',how='left')
@@ -280,6 +279,8 @@ def extract_merchant_feature(feature):
     merchant=pd.merge(merchant,d34,on='instance_id',how='left')
     merchant=pd.merge(merchant,d35,on='instance_id',how='left')
     merchant=pd.merge(merchant,d36,on='instance_id',how='left')
+    merchant=merchant.drop(['instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','is_trade'],axis=1)
+    merchant=merchant.drop_duplicates()
     return merchant
 #%%
 merchant_feature1=extract_merchant_feature(feature1)
@@ -812,10 +813,17 @@ shop_feature3=extract_shop_feature(feature3)
 #%%
 """
 从label窗提取的特征
+当天用户：
+当天用户浏览的商品数量
+当天用户浏览的商家数量
+当天用户浏览的商品平均-----
 
+当天商铺
+当天商品
 """
 dataset=dataset1
-
+def extract_other_feature(dataset):
+    other=dataset[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description']]
 
 
 

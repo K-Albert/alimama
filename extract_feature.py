@@ -290,7 +290,7 @@ def extract_merchant_feature(feature):
 #消费过该商家的不同用户个数
     d37=merchant[['item_id','user_id']]
     d37=d37.drop_duplicates()[['item_id']]
-    d37=d37.groupby('item_id').size.reset_index()
+    d37=d37.groupby('item_id').size().reset_index()
     d37.rename(columns={0:'merchant_dif_user_buy'},inplace=True)
 #组合起来
     merchant=pd.merge(merchant,d,on='second_category',how='left')
@@ -340,13 +340,18 @@ def extract_merchant_feature(feature):
     merchant=pd.merge(merchant,d36,on='instance_id',how='left')
     merchant=pd.merge(merchant,d37,on='item_id',how='left')
 #    merchant=pd.merge(merchant,d38,on='instance_id',how='left')    
-    merchant=merchant.drop(['instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','is_trade','user_id','predict_category','predict_property','predict_category_property'],axis=1)
+    merchant=merchant.drop(['second_category','instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade'],axis=1)
     merchant=merchant.drop_duplicates()
     return merchant
 #%%
 merchant_feature1=extract_merchant_feature(feature1)
 merchant_feature2=extract_merchant_feature(feature2)
 merchant_feature3=extract_merchant_feature(feature3)
+#%%
+merchant_feature1.to_csv('data/merchant_feature1.csv',index=None)
+merchant_feature2.to_csv('data/merchant_feature2.csv',index=None)
+merchant_feature3.to_csv('data/merchant_feature3.csv',index=None)
+
 #%%   user
 """
 提取用户信息
@@ -676,7 +681,6 @@ def extract_user_feature(feature):
     d45=d45.groupby('user_id').apply(sortFrequest).reset_index()
     d45.rename(columns={0:'user_buy_frequest_hour'},inplace=True)
     
-    user=user.drop(['real_hour','instance_id','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade'],axis=1)
     user=pd.merge(user,d,on='user_id',how='left')
     user=pd.merge(user,d1,on='user_id',how='left')
     user=pd.merge(user,d2,on='user_id',how='left')
@@ -724,12 +728,17 @@ def extract_user_feature(feature):
     user=pd.merge(user,d43,on='user_occupation_id',how='left')
     user=pd.merge(user,d44,on='user_star_level',how='left')
     user=pd.merge(user,d45,on='user_id',how='left')
+    user=user.drop(['instance_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade','real_hour'],axis=1)
+    
     return user
 #%%
 user1=  extract_user_feature(feature1)  
 user2=  extract_user_feature(feature2)    
-user3=  extract_user_feature(feature3)    
+user3=  extract_user_feature(feature3)  
+#%%  
 user1.to_csv('data/user1.csv',index=None)
+user2.to_csv('data/user2.csv',index=None)
+user3.to_csv('data/user3.csv',index=None)
 #%%    shop
 """
 店铺特征：
@@ -858,7 +867,6 @@ def extract_shop_feature(feature):
     d19['shop_positive_num']=d19['shop_review_positive_rate']*d19['shop_review_num_level']
     d19=d19[['shop_id','shop_positive_num']]
     
-    shop=shop.drop(['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','is_trade'],axis=1)
     shop=pd.merge(shop,d,on='shop_id',how='left')
     shop=pd.merge(shop,d1,on='shop_id',how='left')
     shop=pd.merge(shop,d2,on='shop_id',how='left')
@@ -880,12 +888,18 @@ def extract_shop_feature(feature):
     shop=pd.merge(shop,d17,on='shop_review_num_level',how='left')
     shop=pd.merge(shop,d18,on='shop_star_level',how='left')
     shop['shop_positive_num']=shop['shop_review_positive_rate']*shop['shop_review_num_level']
+    shop=shop.drop(['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade'],axis=1)
     #shop=pd.merge(shop,d19,on='shop_id',how='left')
     return shop
 #%%
 shop_feature1=extract_shop_feature(feature1)
 shop_feature2=extract_shop_feature(feature2)
 shop_feature3=extract_shop_feature(feature3)
+#%%
+shop_feature1.to_csv('data/shop_feature1.csv',index=None)
+shop_feature2.to_csv('data/shop_feature2.csv',index=None)
+shop_feature3.to_csv('data/shop_feature3.csv',index=None)
+
 #%%
 """
 从label窗提取的特征
@@ -973,12 +987,61 @@ def extract_other_feature(dataset):
     other=pd.merge(other,d8,on='context_page_id',how='left')
     other=pd.merge(other,d9,on='instance_id',how='left')
     other=pd.merge(other,d10,on='instance_id',how='left')
+    other=pd.merge(other,d11,on='instance_id',how='left')
     other=other.drop(['instance_id','item_brand_id','item_city_id','perdict_category','item_category_list','perdict_property','item_property_list'],axis=1)
     return other
 #%%
 other1= extract_other_feature(dataset1)
 other2= extract_other_feature(dataset2)
 other3= extract_other_feature(dataset3)
+
+#%%
+"""
+上下文信息
+预测的类目属性列表中正确率
+正确个数
+不同正确个数的购买转化率
+不同页的购买转化率
+"""
+def extract_context_label_feature(fearure):
+    context=feature[['is_trade','context_page_id','perdict_property','item_property_list']]
+    context['label_predict_property_right_num']=context['item_property_list'].astype('str')+':'+context['perdict_property'].astype('str')
+    context['label_predict_property_right_num']=context['label_predict_property_right_num'].apply(predictPropertyRightNum)
+    
+    d=context[['label_predict_property_right_num','is_trade']]
+    d['cnt']=1
+    d=d.groupby('label_predict_property_right_num').agg('sum').reset_index()    
+    d['label_predict_property_right_num_buy_rate']=d['is_trade']/d['cnt']
+    d=d[['label_predict_property_right_num','label_predict_property_right_num_buy_rate']]  
+    return d
+def extract_context_page_feature(fearure):
+    context=feature[['is_trade','context_page_id','perdict_property','item_property_list']]
+    d=context[['context_page_id','is_trade']]
+    d['cnt']=1
+    d=d.groupby('context_page_id').agg('sum').reset_index()    
+    d['context_page_buy_rate']=d['is_trade']/d['cnt']
+    d=d[['context_page_id','context_page_buy_rate']] 
+    return d
+#%%
+context_label1= extract_context_label_feature(feature1) 
+context_label2= extract_context_label_feature(feature2) 
+context_label3= extract_context_label_feature(feature3) 
+
+context_page1= extract_context_page_feature(feature1) 
+context_page2= extract_context_page_feature(feature2) 
+context_page3= extract_context_page_feature(feature3) 
+
+other1=pd.merge(other1,context_label1,on='label_predict_property_right_num',how='left')
+other2=pd.merge(other2,context_label2,on='label_predict_property_right_num',how='left')
+other3=pd.merge(other3,context_label3,on='label_predict_property_right_num',how='left')
+
+other1=pd.merge(other1,context_page1,on='context_page_id',how='left')
+other2=pd.merge(other2,context_page2,on='context_page_id',how='left')
+other3=pd.merge(other3,context_page3,on='context_page_id',how='left')
+#%% 
+other1.to_csv('data/other1.csv',index=None)
+other2.to_csv('data/other2.csv',index=None)
+other3.to_csv('data/other3.csv',index=None)
 #%%
 """
 用户——商品
@@ -989,7 +1052,15 @@ other3= extract_other_feature(dataset3)
 用户——商品收藏此书 购买转化率
 用户——商品展示次数 购买转化率
 """
-def extract_user_merchant_feature(dataset):
+def extract_user_merchant_feature(feature):
+    user_merchant=feature[['user_id','item_id','is_trade','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level']]
+#用户——商品城市 
+    d=user_merchant[['user_id','item_city_id','is_trade']]
+    d['cnt']=1
+    d=d.groupby(['user_id','item_city_id']).agg('sum').reset_index()    
+    d['user_item_city_buy_rate']=d['is_trade']/d['cnt']
+    d=d[['user_id','item_city_id','user_item_city_buy_rate']]
+
 #%%
 """
 用户——商店
@@ -997,15 +1068,7 @@ def extract_user_merchant_feature(dataset):
 用户——商店星级  购买转化率
 用户——商店 好评数（需要计算） 购买转化率
 """
-def extract_user_shop_feature(dataset):
+def extract_user_shop_feature(feature):
+    user_shop=feature[['user_id','shop_id','is_trade','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','hop_score_description']]
 #%%
-"""
-上下文信息
-预测的类目属性列表中正确率
-正确个数
-不同正确个数的购买转化率
-不同页的购买转化率
-"""
-def extract_context_feature(dataset):
-
-
+    

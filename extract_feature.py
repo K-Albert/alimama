@@ -988,7 +988,7 @@ def extract_other_feature(dataset):
     other=pd.merge(other,d9,on='instance_id',how='left')
     other=pd.merge(other,d10,on='instance_id',how='left')
     other=pd.merge(other,d11,on='instance_id',how='left')
-    other=other.drop(['instance_id','item_brand_id','item_city_id','perdict_category','item_category_list','perdict_property','item_property_list'],axis=1)
+    other=other.drop(['item_brand_id','item_city_id','perdict_category','item_category_list','perdict_property','item_property_list'],axis=1)
     return other
 #%%
 other1= extract_other_feature(dataset1)
@@ -1071,4 +1071,44 @@ def extract_user_merchant_feature(feature):
 def extract_user_shop_feature(feature):
     user_shop=feature[['user_id','shop_id','is_trade','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','hop_score_description']]
 #%%
-    
+other1=pd.read_csv('data/other1.csv')
+other2=pd.read_csv('data/other2.csv')
+other3=pd.read_csv('data/other3.csv')
+
+merchant_feature1=pd.read_csv('data/merchant_feature1.csv')
+merchant_feature2=pd.read_csv('data/merchant_feature2.csv')
+merchant_feature3=pd.read_csv('data/merchant_feature3.csv')
+
+shop_feature1=pd.read_csv('data/shop_feature1.csv')
+shop_feature2=pd.read_csv('data/shop_feature2.csv')
+shop_feature3=pd.read_csv('data/shop_feature3.csv')
+
+user1=pd.read_csv('data/user1.csv')
+user2=pd.read_csv('data/user2.csv')
+user3=pd.read_csv('data/user3.csv')    
+
+dataset1= pd.merge(other1,merchant_feature1,on='item_id',how='left',copy=False)
+dataset1= pd.merge(dataset1,shop_feature1,on=['shop_id'],how='left',copy=False)
+dataset1= pd.merge(dataset1,user1,on='user_id',how='left',copy=False)
+
+dataset2= pd.merge(other2,merchant_feature2,on='item_id',how='left')
+dataset2= pd.merge(dataset2,shop_feature2,on='shop_id',how='left')
+dataset2= pd.merge(dataset2,user2,on='user_id',how='left')
+
+dataset3= pd.merge(other3,merchant_feature3,on='item_id',how='left')
+dataset3= pd.merge(dataset3,shop_feature3,on='shop_id',how='left')
+dataset3= pd.merge(dataset3,user3,on='user_id',how='left')
+
+dataset1=dataset1.fillna(value=-1)
+dataset2=dataset2.fillna(value=-1)
+dataset3=dataset3.fillna(value=-1)
+
+
+dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
+dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)
+dataset3=dataset3.drop(['item_id','shop_id','user_id'],axis=1)
+
+
+
+
+   

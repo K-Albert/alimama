@@ -920,7 +920,7 @@ shop_feature3.to_csv('data/shop_feature3.csv',index=None)
 """
 #dataset=dataset1
 def extract_other_feature(dataset):
-    other=dataset[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','real_hour','context_page_id','perdict_category','item_category_list','perdict_property','item_property_list']]
+    other=dataset
 #当天用户浏览的商品数量
     d=other[['user_id']]
     d=d.groupby('user_id').size().reset_index()
@@ -939,15 +939,15 @@ def extract_other_feature(dataset):
 #用户当天浏览的商品的平均价格等级
     d3=other[['user_id','item_price_level']]
     d3=round(d3.groupby('user_id').agg('mean').reset_index())
-    d3.rename(columns={'item_price_level':'label_user_look_mean_item_price_level'})
+    d3.rename(columns={'item_price_level':'label_user_look_mean_item_price_level'},inplace=True)
 #用户当天浏览的商品的平均销量等级
     d4=other[['user_id','item_sales_level']]
     d4=round(d4.groupby('user_id').agg('mean').reset_index())
-    d4.rename(columns={'item_sales_level':'label_user_look_mean_item_sales_level'})
+    d4.rename(columns={'item_sales_level':'label_user_look_mean_item_sales_level'},inplace=True)
 #用户当天浏览的商品的平均收藏次数
     d5=other[['user_id','item_collected_level']]
     d5=round(d5.groupby('user_id').agg('mean').reset_index())
-    d5.rename(columns={'item_collected_level':'label_user_look_mean_item_collected_level'})
+    d5.rename(columns={'item_collected_level':'label_user_look_mean_item_collected_level'},inplace=True)
 #当天店铺被浏览册数  
     d6=other[['shop_id']]
     d6=d6.groupby('shop_id').size().reset_index()
@@ -988,7 +988,7 @@ def extract_other_feature(dataset):
     other=pd.merge(other,d9,on='instance_id',how='left')
     other=pd.merge(other,d10,on='instance_id',how='left')
     other=pd.merge(other,d11,on='instance_id',how='left')
-    other=other.drop(['item_brand_id','item_city_id','perdict_category','item_category_list','perdict_property','item_property_list'],axis=1)
+    other=other.drop(['item_brand_id','item_city_id','perdict_category','context_id','item_category_list','perdict_property','item_property_list','predict_category_property','context_timestamp','real_time','real_day'],axis=1)
     return other
 #%%
 other1= extract_other_feature(dataset1)
@@ -1003,7 +1003,7 @@ other3= extract_other_feature(dataset3)
 不同正确个数的购买转化率
 不同页的购买转化率
 """
-def extract_context_label_feature(fearure):
+def extract_context_label_feature(feature):
     context=feature[['is_trade','context_page_id','perdict_property','item_property_list']]
     context['label_predict_property_right_num']=context['item_property_list'].astype('str')+':'+context['perdict_property'].astype('str')
     context['label_predict_property_right_num']=context['label_predict_property_right_num'].apply(predictPropertyRightNum)
@@ -1014,7 +1014,7 @@ def extract_context_label_feature(fearure):
     d['label_predict_property_right_num_buy_rate']=d['is_trade']/d['cnt']
     d=d[['label_predict_property_right_num','label_predict_property_right_num_buy_rate']]  
     return d
-def extract_context_page_feature(fearure):
+def extract_context_page_feature(feature):
     context=feature[['is_trade','context_page_id','perdict_property','item_property_list']]
     d=context[['context_page_id','is_trade']]
     d['cnt']=1
@@ -1087,8 +1087,23 @@ user1=pd.read_csv('data/user1.csv')
 user2=pd.read_csv('data/user2.csv')
 user3=pd.read_csv('data/user3.csv')    
 
+other1.drop_duplicates(inplace=True)
+shop_feature1.drop_duplicates(inplace=True)
+user1.drop_duplicates(inplace=True)
+merchant_feature1.drop_duplicates(inplace=True)
+
+other2.drop_duplicates(inplace=True)
+shop_feature2.drop_duplicates(inplace=True)
+user2.drop_duplicates(inplace=True)
+merchant_feature2.drop_duplicates(inplace=True)
+
+other3.drop_duplicates(inplace=True)
+shop_feature3.drop_duplicates(inplace=True)
+user3.drop_duplicates(inplace=True)
+merchant_feature3.drop_duplicates(inplace=True)
+
 dataset1= pd.merge(other1,merchant_feature1,on='item_id',how='left',copy=False)
-dataset1= pd.merge(dataset1,shop_feature1,on=['shop_id'],how='left',copy=False)
+dataset1= pd.merge(dataset1,shop_feature1,on='shop_id',how='left',copy=False)
 dataset1= pd.merge(dataset1,user1,on='user_id',how='left',copy=False)
 
 dataset2= pd.merge(other2,merchant_feature2,on='item_id',how='left')
@@ -1103,11 +1118,13 @@ dataset1=dataset1.fillna(value=-1)
 dataset2=dataset2.fillna(value=-1)
 dataset3=dataset3.fillna(value=-1)
 
-
-dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
-dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)
-dataset3=dataset3.drop(['item_id','shop_id','user_id'],axis=1)
-
+dataset1=dataset1.drop(['item_id','shop_id','user_id','context_page_id'],axis=1)
+dataset2=dataset2.drop(['item_id','shop_id','user_id','context_page_id'],axis=1)
+dataset3=dataset3.drop(['item_id','shop_id','user_id','context_page_id'],axis=1)
+#%%
+dataset1.to_csv('data/dataset1.csv',index=None)
+dataset2.to_csv('data/dataset2.csv',index=None)
+dataset3.to_csv('data/dataset3.csv',index=None)
 
 
 

@@ -153,7 +153,8 @@ feature窗提取商品特征
 def extract_merchant_feature(feature):
     merchant=feature[['instance_id','item_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade']]
     merchant['second_category']=merchant['item_category_list'].apply(splitItemCategory_second)  
-    merchant['item_property_cnt']=merchant.item_property_list.apply(itemPropertyCnt)     
+    merchant['item_property_cnt']=merchant.item_property_list.apply(itemPropertyCnt)  
+    merchant['third_category']=merchant.item_category_list.apply(lambda x:-1 if(len(x.split(';'))<3) else int(x.split(';')[2]))  
 #‘second_caregory’该二级类目下商品的 平均、最大、最小价格等级，销量等级，收藏次数等级，展示次数等级（几个数据集的二级类目相同）
     d=merchant[['second_category','item_price_level','item_sales_level','item_collected_level','item_pv_level']]
     d.replace(-1,0,inplace=True)
@@ -351,7 +352,7 @@ def extract_merchant_feature(feature):
     merchant=pd.merge(merchant,d36,on='instance_id',how='left')
     merchant=pd.merge(merchant,d37,on='item_id',how='left')
 #    merchant=pd.merge(merchant,d38,on='instance_id',how='left')    
-    merchant=merchant.drop(['second_category','instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade'],axis=1)
+    merchant=merchant.drop(['instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade'],axis=1)
    # merchant=merchant.drop(['item_sales_level'],axis=1)
    # merchant=merchant.drop(['item_property_cnt'],axis=1)
 

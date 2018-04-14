@@ -23,17 +23,17 @@ dataset3=pd.read_csv('data/dataset3_add.csv')
 dataset2=pd.read_csv('data/dataset2_add.csv')
 dataset1=pd.read_csv('data/dataset1_add.csv')
 #%%
-dataset3=pd.read_csv('data/dataset3_mean.csv')
-dataset2=pd.read_csv('data/dataset2_mean.csv')
-dataset1=pd.read_csv('data/dataset1_mean.csv')
+dataset3=pd.read_csv('data/dataset3.csv')
+dataset2=pd.read_csv('data/dataset2.csv')
+dataset1=pd.read_csv('data/dataset1.csv')
 #%%
 label2=dataset2[['is_trade']]
 label1=dataset1[['is_trade']]
 dataset3_pre=dataset3[['instance_id']]
 
-dataset3.drop(['instance_id'],axis=1,inplace=True)
-dataset1.drop(['is_trade'],axis=1,inplace=True)
-dataset2.drop(['is_trade'],axis=1,inplace=True)
+dataset3.drop(['instance_id','second_category'],axis=1,inplace=True)
+dataset1.drop(['is_trade','second_category'],axis=1,inplace=True)
+dataset2.drop(['is_trade','second_category'],axis=1,inplace=True)
 dataset1.drop(['instance_id'],axis=1,inplace=True)
 dataset2.drop(['instance_id'],axis=1,inplace=True)
 #%%
@@ -53,7 +53,7 @@ model = xgb.XGBClassifier(
         learning_rate=0.01,
  	     tree_method='exact',
  	     seed=0,
-        n_estimators=3000 
+        n_estimators=712 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
 model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)
@@ -62,8 +62,14 @@ model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)
 用dataset1训练 测试dataset2 0.0818
 """
 #%%
-dataset3_pre['predicted_score']=model.predict(dataset3)
-dataset3_pre.to_csv('20180414_0.083374_add_xgboost.txt',sep=" ",index=False)
+xgb.plot_importance(model)
+pyplot.show()
+
+feature_importance=pd.Series(model.feature_importances_)
+feature_importance.index=dataset2.columns
+#%%
+dataset3_pre['predicted_score']=model.predict_proba(dataset3)
+dataset3_pre.to_csv('20180414_0.0832_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb
@@ -83,17 +89,22 @@ watchlist = [(dataset1, label11)]#watchlist
 #                        )
 
 gbm = lgb.LGBMRegressor(objective='binary',
-                        num_leaves=3,
+                        num_leaves=60,
+                        is_unbalance='True',
                         learning_rate=0.05,
-                        n_estimators=720,
-                        max_bin = 55, 
+                        n_estimators=10000,
+                        #max_bin = 55, 
                         bagging_fraction = 0.8,
                         bagging_freq = 5, 
-                        feature_fraction = 0.2319,
-                        feature_fraction_seed=9, 
+                        #feature_fraction = 0.8,
+                        #feature_fraction_seed=9, 
                         bagging_seed=9,
                         min_data_in_leaf =6, 
-                        min_sum_hessian_in_leaf = 11)
+                        min_sum_hessian_in_leaf = 11
+                        )
+                        #colsample_bytree = 0.7,
+                        #subsample = 0.7)
+                       # min_child_weight=1.1)
 gbm.fit(dataset2,label22,
     eval_set=watchlist,
     eval_metric=['binary_logloss'],

@@ -454,7 +454,7 @@ y_tt = gbm_sub.predict(X_train, num_iteration=gbm_sub.best_iteration)
 from sklearn.metrics import log_loss
 print(log_loss(y_train,y_tt))
 #%%
-y_sub_1 = gbm.predict(X_test)
+y_sub_1 = gbm_sub.predict(X_test)
 
 sub = pd.DataFrame()
 sub['instance_id'] = list(test_index)

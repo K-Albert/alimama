@@ -86,14 +86,21 @@ test_a['real_day'] = test_a['real_time'].dt.day
 test_a['perdict_category']=test_a['predict_category_property'].apply(splitPredicCategory)
 test_a['perdict_property']=test_a['predict_category_property'].apply(splitPredicProperty)
 #18 19 20 21 22
-feature1=train[train['real_day']<23]
+#feature1=train[train['real_day']<23]
 dataset1=train[train['real_day']==23]
 #19 20 21 22 23
-feature2=train[(train['real_day']<24)&(train['real_day']>18)]
+#feature2=train[(train['real_day']<24)&(train['real_day']>18)]
 dataset2=train[train['real_day']==24]
 #20 21 22 23 24
-feature3=train[(train['real_day']<25)&(train['real_day']>19)]
+#feature3=train[(train['real_day']<25)&(train['real_day']>19)]
 dataset3=test_a
+feature1=train[train['real_day']==18]
+feature2=train[train['real_day']==19]
+feature3=train[train['real_day']==20]
+feature4=train[train['real_day']==21]
+feature5=train[train['real_day']==22]
+feature6=train[train['real_day']==23]
+feature7=train[train['real_day']==24]
 #%% 为xgboost编写自定义损失函数
 def c_log_loss(y_t,y_p):
     tmp = np.array(y_t) * np.log(np.array(y_p)) + (1 - np.array(y_t)) * np.log(1 - np.array(y_p))
@@ -150,15 +157,15 @@ def extract_merchant_feature(feature):
 #‘second_caregory’该二级类目下商品的 平均、最大、最小价格等级，销量等级，收藏次数等级，展示次数等级（几个数据集的二级类目相同）
     d=merchant[['second_category','item_price_level','item_sales_level','item_collected_level','item_pv_level']]
     d.replace(-1,0,inplace=True)
-    d=round(d.groupby('second_category').agg(['mean','max','min']).reset_index())
-    d.columns=['second_category','mean_item_price_level','max_item_price_level','min_item_price_level','mean_item_sales_level','max_item_sales_level','min_item_sales_level','mean_item_collected_level','max_item_collected_level','min_item_collected_level','mean_item_pv_level','max_item_pv_level','min_item_pv_level']
+    d=round(d.groupby('second_category').agg(['mean']).reset_index())
+    d.columns=['second_category','mean_item_price_level','mean_item_sales_level','mean_item_collected_level','mean_item_pv_level']
 #‘second_caregory’该二级类目下成功销售的商品的 平均、最大、最小价格等级，销量等级，收藏次数等级，展示次数等级（item_sales_level有缺失值 用0替代的  会影响最小值）   
     d1=merchant[['second_category','item_price_level','item_sales_level','item_collected_level','item_pv_level','is_trade']]
     d1=d1[d1['is_trade']==1]
     d1=d1.drop('is_trade',axis=1)
     d1.replace(-1,0,inplace=True)
-    d1=round(d1.groupby('second_category').agg(['mean','max','min']).reset_index())
-    d1.columns=['second_category','trans_mean_item_price_level','trans_max_item_price_level','trans_min_item_price_level','trans_mean_item_sales_level','trans_max_item_sales_level','trans_min_item_sales_level','trans_mean_item_collected_level','trans_max_item_collected_level','trans_min_item_collected_level','trans_mean_item_pv_level','trans_max_item_pv_level','trans_min_item_pv_level']
+    d1=round(d1.groupby('second_category').agg(['mean']).reset_index())
+    d1.columns=['second_category','trans_mean_item_price_level','trans_mean_item_sales_level','trans_mean_item_collected_level','trans_mean_item_pv_level']
 #‘second_caregory’二和一的比
     d3=d[['second_category']]
     d3['mean_item_price_level_rate']=d1['trans_mean_item_price_level']/d['mean_item_price_level']
@@ -293,6 +300,10 @@ def extract_merchant_feature(feature):
     d37=d37.groupby('item_id').size().reset_index()
     d37.rename(columns={0:'merchant_dif_user_buy'},inplace=True)
 #组合起来
+    #merchant=merchant.drop(['user_id','perdict_category','perdict_property','predict_category_property','is_trade'],axis=1)
+       
+
+#    merchant=merchant.drop_duplicates(['item_id'])
     merchant=pd.merge(merchant,d,on='second_category',how='left')
     merchant=pd.merge(merchant,d1,on='second_category',how='left')
     merchant=pd.merge(merchant,d3,on='second_category',how='left')
@@ -333,24 +344,36 @@ def extract_merchant_feature(feature):
     merchant=pd.merge(merchant,d30,on='item_property_cnt',how='left')
     merchant=pd.merge(merchant,d31,on='item_property_cnt',how='left')
     
-    merchant=pd.merge(merchant,d32,on='instance_id',how='left')
-    merchant=pd.merge(merchant,d33,on='instance_id',how='left')
-    merchant=pd.merge(merchant,d34,on='instance_id',how='left')
+#    merchant=pd.merge(merchant,d32,on='instance_id',how='left')
+#    merchant=pd.merge(merchant,d33,on='instance_id',how='left')
+#    merchant=pd.merge(merchant,d34,on='instance_id',how='left')
     merchant=pd.merge(merchant,d35,on='instance_id',how='left')
     merchant=pd.merge(merchant,d36,on='instance_id',how='left')
     merchant=pd.merge(merchant,d37,on='item_id',how='left')
 #    merchant=pd.merge(merchant,d38,on='instance_id',how='left')    
-    merchant=merchant.drop(['second_category','instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade'],axis=1)
-    merchant=merchant.drop_duplicates()
+    merchant=merchant.drop(['second_category','instance_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade'],axis=1)
+   # merchant=merchant.drop(['item_sales_level'],axis=1)
+   # merchant=merchant.drop(['item_property_cnt'],axis=1)
+
+    merchant=merchant.drop_duplicates(['item_id'])
     return merchant
 #%%
 merchant_feature1=extract_merchant_feature(feature1)
 merchant_feature2=extract_merchant_feature(feature2)
 merchant_feature3=extract_merchant_feature(feature3)
+merchant_feature4=extract_merchant_feature(feature4)
+merchant_feature5=extract_merchant_feature(feature5)
+merchant_feature6=extract_merchant_feature(feature6)
+merchant_feature7=extract_merchant_feature(feature7)
+
 #%%
 merchant_feature1.to_csv('data/merchant_feature1.csv',index=None)
 merchant_feature2.to_csv('data/merchant_feature2.csv',index=None)
 merchant_feature3.to_csv('data/merchant_feature3.csv',index=None)
+merchant_feature4.to_csv('data/merchant_feature4.csv',index=None)
+merchant_feature5.to_csv('data/merchant_feature5.csv',index=None)
+merchant_feature6.to_csv('data/merchant_feature6.csv',index=None)
+merchant_feature7.to_csv('data/merchant_feature7.csv',index=None)
 
 #%%   user
 """
@@ -729,16 +752,27 @@ def extract_user_feature(feature):
     user=pd.merge(user,d44,on='user_star_level',how='left')
     user=pd.merge(user,d45,on='user_id',how='left')
     user=user.drop(['instance_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade','real_hour'],axis=1)
-    
+    user=user.drop_duplicates()
+    user=user.drop_duplicates(['user_id'])
     return user
 #%%
 user1=  extract_user_feature(feature1)  
 user2=  extract_user_feature(feature2)    
-user3=  extract_user_feature(feature3)  
+user3=  extract_user_feature(feature3) 
+user4=  extract_user_feature(feature4)  
+user5=  extract_user_feature(feature5)    
+user6=  extract_user_feature(feature6)
+user7=  extract_user_feature(feature7)  
+ 
 #%%  
 user1.to_csv('data/user1.csv',index=None)
 user2.to_csv('data/user2.csv',index=None)
 user3.to_csv('data/user3.csv',index=None)
+user4.to_csv('data/user4.csv',index=None)
+user5.to_csv('data/user5.csv',index=None)
+user6.to_csv('data/user6.csv',index=None)
+user7.to_csv('data/user7.csv',index=None)
+
 #%%    shop
 """
 店铺特征：
@@ -890,15 +924,26 @@ def extract_shop_feature(feature):
     shop['shop_positive_num']=shop['shop_review_positive_rate']*shop['shop_review_num_level']
     shop=shop.drop(['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade'],axis=1)
     #shop=pd.merge(shop,d19,on='shop_id',how='left')
+    shop=shop.drop_duplicates()
+    shop=shop.drop_duplicates(['shop_id'])
     return shop
 #%%
 shop_feature1=extract_shop_feature(feature1)
 shop_feature2=extract_shop_feature(feature2)
 shop_feature3=extract_shop_feature(feature3)
+shop_feature4=extract_shop_feature(feature4)
+shop_feature5=extract_shop_feature(feature5)
+shop_feature6=extract_shop_feature(feature6)
+shop_feature7=extract_shop_feature(feature7)
+
 #%%
 shop_feature1.to_csv('data/shop_feature1.csv',index=None)
 shop_feature2.to_csv('data/shop_feature2.csv',index=None)
 shop_feature3.to_csv('data/shop_feature3.csv',index=None)
+shop_feature4.to_csv('data/shop_feature4.csv',index=None)
+shop_feature5.to_csv('data/shop_feature5.csv',index=None)
+shop_feature6.to_csv('data/shop_feature6.csv',index=None)
+shop_feature7.to_csv('data/shop_feature7.csv',index=None)
 
 #%%
 """
@@ -1071,6 +1116,7 @@ def extract_user_merchant_feature(feature):
 def extract_user_shop_feature(feature):
     user_shop=feature[['user_id','shop_id','is_trade','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','hop_score_description']]
 #%%
+#读取
 other1=pd.read_csv('data/other1.csv')
 other2=pd.read_csv('data/other2.csv')
 other3=pd.read_csv('data/other3.csv')
@@ -1078,41 +1124,104 @@ other3=pd.read_csv('data/other3.csv')
 merchant_feature1=pd.read_csv('data/merchant_feature1.csv')
 merchant_feature2=pd.read_csv('data/merchant_feature2.csv')
 merchant_feature3=pd.read_csv('data/merchant_feature3.csv')
+merchant_feature4=pd.read_csv('data/merchant_feature4.csv')
+merchant_feature5=pd.read_csv('data/merchant_feature5.csv')
+merchant_feature6=pd.read_csv('data/merchant_feature6.csv')
+merchant_feature7=pd.read_csv('data/merchant_feature7.csv')
 
 shop_feature1=pd.read_csv('data/shop_feature1.csv')
 shop_feature2=pd.read_csv('data/shop_feature2.csv')
 shop_feature3=pd.read_csv('data/shop_feature3.csv')
+shop_feature4=pd.read_csv('data/shop_feature4.csv')
+shop_feature5=pd.read_csv('data/shop_feature5.csv')
+shop_feature6=pd.read_csv('data/shop_feature6.csv')
+shop_feature7=pd.read_csv('data/shop_feature7.csv')
 
 user1=pd.read_csv('data/user1.csv')
 user2=pd.read_csv('data/user2.csv')
-user3=pd.read_csv('data/user3.csv')    
+user3=pd.read_csv('data/user3.csv') 
+user4=pd.read_csv('data/user4.csv')
+user5=pd.read_csv('data/user5.csv')  
+user6=pd.read_csv('data/user6.csv')
+user7=pd.read_csv('data/user7.csv')     
+#%%
+#利用三天的平均信息
+merchant_part1=pd.concat([merchant_feature1,merchant_feature2,merchant_feature3,merchant_feature4],ignore_index=True)
+merchant_part2=pd.concat([merchant_feature2,merchant_feature3,merchant_feature4,merchant_feature5],ignore_index=True)
+merchant_part3=pd.concat([merchant_feature3,merchant_feature4,merchant_feature5,merchant_feature6],ignore_index=True)
 
-other1.drop_duplicates(inplace=True)
-shop_feature1.drop_duplicates(inplace=True)
-user1.drop_duplicates(inplace=True)
-merchant_feature1.drop_duplicates(inplace=True)
+merchant_part1=merchant_part1.groupby('item_id').agg('mean').reset_index()
+merchant_part2=merchant_part2.groupby('item_id').agg('mean').reset_index()
+merchant_part3=merchant_part3.groupby('item_id').agg('mean').reset_index()
 
-other2.drop_duplicates(inplace=True)
-shop_feature2.drop_duplicates(inplace=True)
-user2.drop_duplicates(inplace=True)
-merchant_feature2.drop_duplicates(inplace=True)
+shop_part1=pd.concat([shop_feature1,shop_feature2,shop_feature3,shop_feature4],ignore_index=True)
+shop_part2=pd.concat([shop_feature2,shop_feature3,shop_feature4,shop_feature5],ignore_index=True)
+shop_part3=pd.concat([shop_feature3,shop_feature4,shop_feature5,shop_feature6],ignore_index=True)
 
-other3.drop_duplicates(inplace=True)
-shop_feature3.drop_duplicates(inplace=True)
-user3.drop_duplicates(inplace=True)
-merchant_feature3.drop_duplicates(inplace=True)
+shop_part1=shop_part1.groupby('shop_id').agg('mean').reset_index()
+shop_part2=shop_part2.groupby('shop_id').agg('mean').reset_index()
+shop_part3=shop_part3.groupby('shop_id').agg('mean').reset_index()
 
-dataset1= pd.merge(other1,merchant_feature1,on='item_id',how='left',copy=False)
-dataset1= pd.merge(dataset1,shop_feature1,on='shop_id',how='left',copy=False)
-dataset1= pd.merge(dataset1,user1,on='user_id',how='left',copy=False)
+user_part1=pd.concat([user1,user2,user3,user4],ignore_index=True)
+user_part2=pd.concat([user2,user3,user4,user5],ignore_index=True)
+user_part3=pd.concat([user3,user4,user5,user6],ignore_index=True)
 
-dataset2= pd.merge(other2,merchant_feature2,on='item_id',how='left')
-dataset2= pd.merge(dataset2,shop_feature2,on='shop_id',how='left')
-dataset2= pd.merge(dataset2,user2,on='user_id',how='left')
+user_part1=user_part1.groupby('user_id').agg('mean').reset_index()
+user_part2=user_part2.groupby('user_id').agg('mean').reset_index()
+user_part3=user_part3.groupby('user_id').agg('mean').reset_index()
+#%%
+dataset1.to_csv('data/dataset1_mean.csv',index=None)
+dataset2.to_csv('data/dataset2_mean.csv',index=None)
+dataset3.to_csv('data/dataset3_mean.csv',index=None)
+#%%
+#利用x天的单独信息
+merchant_part1=pd.merge(merchant_feature1,merchant_feature2,on='item_id',how='outer',copy=False)
+merchant_part1=pd.merge(merchant_part1,merchant_feature3,on='item_id',how='outer',copy=False)
+merchant_part1=pd.merge(merchant_part1,merchant_feature4,on='item_id',how='outer',copy=False)
 
-dataset3= pd.merge(other3,merchant_feature3,on='item_id',how='left')
-dataset3= pd.merge(dataset3,shop_feature3,on='shop_id',how='left')
-dataset3= pd.merge(dataset3,user3,on='user_id',how='left')
+merchant_part2=pd.merge(merchant_feature2,merchant_feature3,on='item_id',how='outer',copy=False)
+merchant_part2=pd.merge(merchant_part2,merchant_feature4,on='item_id',how='outer',copy=False)
+merchant_part2=pd.merge(merchant_part2,merchant_feature5,on='item_id',how='outer',copy=False)
+
+merchant_part3=pd.merge(merchant_feature3,merchant_feature4,on='item_id',how='outer',copy=False)
+merchant_part3=pd.merge(merchant_part3,merchant_feature5,on='item_id',how='outer',copy=False)
+merchant_part3=pd.merge(merchant_part3,merchant_feature6,on='item_id',how='outer',copy=False)
+
+shop_part1=pd.merge(shop_feature1,shop_feature2,on='shop_id',how='outer',copy=False)
+shop_part1=pd.merge(shop_part1,shop_feature3,on='shop_id',how='outer',copy=False)
+shop_part1=pd.merge(shop_part1,shop_feature4,on='shop_id',how='outer',copy=False)
+
+shop_part2=pd.merge(shop_feature2,shop_feature3,on='shop_id',how='outer',copy=False)
+shop_part2=pd.merge(shop_part2,shop_feature4,on='shop_id',how='outer',copy=False)
+shop_part2=pd.merge(shop_part2,shop_feature5,on='shop_id',how='outer',copy=False)
+
+shop_part3=pd.merge(shop_feature3,shop_feature4,on='shop_id',how='outer',copy=False)
+shop_part3=pd.merge(shop_part3,shop_feature5,on='shop_id',how='outer',copy=False)
+shop_part3=pd.merge(shop_part3,shop_feature6,on='shop_id',how='outer',copy=False)
+
+user_part1=pd.merge(user1,user2,on='user_id',how='outer',copy=False)
+user_part1=pd.merge(user_part1,user3,on='user_id',how='outer',copy=False)
+user_part1=pd.merge(user_part1,user4,on='user_id',how='outer',copy=False)
+
+user_part2=pd.merge(user2,user3,on='user_id',how='outer',copy=False)
+user_part2=pd.merge(user_part2,user4,on='user_id',how='outer',copy=False)
+user_part2=pd.merge(user_part2,user5,on='user_id',how='outer',copy=False)
+
+user_part3=pd.merge(user3,user4,on='user_id',how='outer',copy=False)
+user_part3=pd.merge(user_part3,user5,on='user_id',how='outer',copy=False)
+user_part3=pd.merge(user_part3,user6,on='user_id',how='outer',copy=False)
+#%%
+dataset1= pd.merge(other1,merchant_part1,on='item_id',how='left',copy=False)
+dataset1= pd.merge(dataset1,shop_part1,on='shop_id',how='left',copy=False)
+dataset1= pd.merge(dataset1,user_part1,on='user_id',how='left',copy=False)
+
+dataset2= pd.merge(other2,merchant_part2,on='item_id',how='left')
+dataset2= pd.merge(dataset2,shop_part2,on='shop_id',how='left')
+dataset2= pd.merge(dataset2,user_part2,on='user_id',how='left')
+
+dataset3= pd.merge(other3,merchant_part3,on='item_id',how='left')
+dataset3= pd.merge(dataset3,shop_part3,on='shop_id',how='left')
+dataset3= pd.merge(dataset3,user_part3,on='user_id',how='left')
 
 dataset1=dataset1.fillna(value=-1)
 dataset2=dataset2.fillna(value=-1)
@@ -1122,9 +1231,9 @@ dataset1=dataset1.drop(['item_id','shop_id','user_id','context_page_id'],axis=1)
 dataset2=dataset2.drop(['item_id','shop_id','user_id','context_page_id'],axis=1)
 dataset3=dataset3.drop(['item_id','shop_id','user_id','context_page_id'],axis=1)
 #%%
-dataset1.to_csv('data/dataset1.csv',index=None)
-dataset2.to_csv('data/dataset2.csv',index=None)
-dataset3.to_csv('data/dataset3.csv',index=None)
+dataset1.to_csv('data/dataset1_add.csv',index=None)
+dataset2.to_csv('data/dataset2_add.csv',index=None)
+dataset3.to_csv('data/dataset3_add.csv',index=None)
 
 
 

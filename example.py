@@ -25,12 +25,12 @@ def time2cov(time_):
     return time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time_))
 
 print('train')
-train = pd.read_csv('../data/round1_ijcai_18_train_20180301.txt',sep=" ")
+train = pd.read_csv('data/round1_ijcai_18_train_20180301.txt',sep=" ")
 train = train.drop_duplicates(['instance_id'])
 train = train.reset_index(drop=True)
 
 print('test')
-test_a = pd.read_csv('../data/round1_ijcai_18_test_a_20180301.txt',sep=" ")
+test_a = pd.read_csv('data/round1_ijcai_18_test_a_20180301.txt',sep=" ")
 
 all_data = pd.concat([train,test_a])
 all_data['real_time'] = pd.to_datetime(all_data['context_timestamp'].apply(time2cov))
@@ -392,7 +392,7 @@ del X_val['context_timestamp']
 X_train = X_train[X_train.columns]
 X_test = X_test[X_train.columns]
 X_val = X_val[X_train.columns]
-
+#%%
 import lightgbm as lgb
 #
 # 线下学习
@@ -453,10 +453,12 @@ y_tt = gbm_sub.predict(X_train, num_iteration=gbm_sub.best_iteration)
 
 from sklearn.metrics import log_loss
 print(log_loss(y_train,y_tt))
+#%%
+y_sub_1 = gbm.predict(X_test)
 
 sub = pd.DataFrame()
 sub['instance_id'] = list(test_index)
 
 sub['predicted_score'] = list(y_sub_1)
  
-sub.to_csv('../result/20180409.txt',sep=" ",index=False)
+sub.to_csv('20180409.txt',sep=" ",index=False)

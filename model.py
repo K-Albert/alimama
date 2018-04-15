@@ -53,10 +53,10 @@ model = xgb.XGBClassifier(
         learning_rate=0.01,
  	     tree_method='exact',
  	     seed=0,
-        n_estimators=712 
+        n_estimators=3000 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)
+model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747
 #model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
 """
 用dataset1训练 测试dataset2 0.0818
@@ -68,8 +68,8 @@ pyplot.show()
 feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
-dataset3_pre['predicted_score']=model.predict_proba(dataset3)
-dataset3_pre.to_csv('20180414_0.0832_xgboost.txt',sep=" ",index=False)
+dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
+dataset3_pre.to_csv('20180415_0.0817_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb
@@ -79,32 +79,40 @@ label11=np.array(label1).squeeze()
 watchlist = [(dataset1, label11)]#watchlist
 #watchlist = [(dataset2, label22)]#watchlist
 
-#gbm = lgb.LGBMRegressor(objective='binary',
-#                        num_leaves=100,
-#                        learning_rate=0.01,
-#                        n_estimators=2000,
-#                        colsample_bytree = 0.7,
-#                        subsample = 0.7,
-#                        seed=0
-#                        )
-
 gbm = lgb.LGBMRegressor(objective='binary',
-                        num_leaves=60,
-                        is_unbalance='True',
-                        learning_rate=0.05,
-                        n_estimators=10000,
-                        #max_bin = 55, 
-                        bagging_fraction = 0.8,
-                        bagging_freq = 5, 
-                        #feature_fraction = 0.8,
-                        #feature_fraction_seed=9, 
-                        bagging_seed=9,
-                        min_data_in_leaf =6, 
-                        min_sum_hessian_in_leaf = 11
+                        num_leaves=100,
+                        learning_rate=0.01,
+                        n_estimators=2000,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
                         )
-                        #colsample_bytree = 0.7,
-                        #subsample = 0.7)
-                       # min_child_weight=1.1)
+
+#gbm = lgb.LGBMRegressor(objective='binary',
+#                        #num_leaves=60,
+#                        #is_unbalance='True',
+#                        max_depth=5,
+#                        colsample_bytree=0.7,
+#                        min_child_weight =1.1,
+#                        learning_rate=0.05,
+#                        reg_lambda =0,
+#                        reg_alpha=0,
+#                        random_state =0,
+#                        min_child_samples =20,
+#                        is_unbalance =True,
+#                        n_estimators=10000,
+#                        #max_bin = 55, 
+#                        #bagging_fraction = 0.8,
+#                        #bagging_freq = 5, 
+#                        #feature_fraction = 0.8,
+#                        #feature_fraction_seed=9, 
+#                        #bagging_seed=9,
+#                        #min_data_in_leaf =6, 
+#                        #min_sum_hessian_in_leaf = 11
+#                        )
+#                        colsample_bytree = 0.7,
+#                        subsample = 0.7)
+#                        min_child_weight=1.1)
 gbm.fit(dataset2,label22,
     eval_set=watchlist,
     eval_metric=['binary_logloss'],
@@ -117,6 +125,9 @@ gbm.fit(dataset2,label22,
 from sklearn.metrics import log_loss
 print(log_loss(y_train,y_tt))
 #%%
+feature_importance=pd.Series(gbm.feature_importances_)
+feature_importance.index=dataset2.columns
+#%%
 dataset3_pre['predicted_score']=gbm.predict(dataset3,num_iteration=gbm.best_iteration_)
-dataset3_pre.to_csv('20180414_0.083_add_gbm.txt',sep=" ",index=False)
+dataset3_pre.to_csv('20180415_0.0826_gbm.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)

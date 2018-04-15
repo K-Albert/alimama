@@ -1123,20 +1123,50 @@ def extract_other_feature(feature,dataset):
     d22=d22.drop_duplicates()
 
 #    商品价格等级 与前n天相比 有没有下降
-#    d23=feature[['item_id','item_price_level']]
-#    d23=d23.drop_duplicates()
-#    d24=other[['item_id','item_price_level']]
-#    d24=d24.drop_duplicates()
-#    d25=pd.merge(d24,d23,on='item_id',how='inner')
+    d23=feature[['item_id','item_price_level']]
+    d23=d23.drop_duplicates()
+    d23=d23.rename(columns={'item_price_level':'item_price_level_before'})
+    d24=other[['item_id','item_price_level']]
+    d24=d24.drop_duplicates()
+    d24=d24.rename(columns={'item_price_level':'item_price_level_now'})
+    d25=pd.merge(d24,d23,on='item_id',how='inner')
+    d25['label_item_price_down']=(d25['item_price_level_now']<d25['item_price_level_before']).astype('int')
+    d23=d25[['item_id','label_item_price_down']]
+    d23=d23.drop_duplicates()
 #    商品 价格等级 与前一天相比 有没有上升
-
+    d24=feature[['item_id','item_price_level']]
+    d24=d24.drop_duplicates()
+    d24=d24.rename(columns={'item_price_level':'item_price_level_before'})
+    d25=other[['item_id','item_price_level']]
+    d25=d25.drop_duplicates()
+    d25=d25.rename(columns={'item_price_level':'item_price_level_now'})
+    d26=pd.merge(d25,d24,on='item_id',how='inner')
+    d26['label_item_price_up']=(d26['item_price_level_now']>d26['item_price_level_before']).astype('int')
+    d24=d26[['item_id','label_item_price_up']]
+    d24=d24.drop_duplicates()
 #  商品 销量等级、展示次数等级、收藏次数等级
-    
-#  前一天 是否 浏览过该item
-    
-#  前一天 是够 浏览过 某品牌
-#  前两天
-# 前三天    
+   
+#  历史上是否 浏览过该item
+    d25=feature[['user_id','item_id']]
+    d25=d25.drop_duplicates()
+    d26=other[['user_id','item_id']]
+    d26=d26.drop_duplicates()
+    d26=pd.merge(d26,d25,on=['item_id','user_id'],how='inner')  
+    d26['label_item_has_before']=1
+    d26=pd.merge(other[['user_id','item_id']],d26,on=['user_id','item_id'],how='left')
+    d26=d26.fillna(0)
+    d26=d26.drop_duplicates()
+#  历史上 是够 浏览过 某品牌
+    sdajjdladjkdjk
+    d25=feature[['user_id','item_id']]
+    d25=d25.drop_duplicates()
+    d26=other[['user_id','item_id']]
+    d26=d26.drop_duplicates()
+    d26=pd.merge(d26,d25,on=['item_id','user_id'],how='inner')  
+    d26['label_item_has_before']=1
+    d26=pd.merge(other[['user_id','item_id']],d26,on=['user_id','item_id'],how='left')
+    d26=d26.fillna(0)
+    d26=d26.drop_duplicates()    
  # 某店铺商品的平均价格等级 有没有下降   
     other=pd.merge(other,d,on='user_id',how='left')
     other=pd.merge(other,d1,on='user_id',how='left')
@@ -1162,6 +1192,9 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d20,on=['user_id','item_city_id','real_time'],how='left')
     other=pd.merge(other,d21,on=['user_id','real_hour','item_price_level'],how='left')
     other=pd.merge(other,d22,on=['user_id','real_hour','shop_review_num_level'],how='left')
+    other=pd.merge(other,d23,on='item_id',how='left')
+    other=pd.merge(other,d24,on='item_id',how='left')
+    other=pd.merge(other,d26,on=['user_id','item_id'],how='left')
 
     other=other.drop(['perdict_category','context_id','perdict_property','predict_category_property','context_timestamp','real_time','real_day','real_hour','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
     return other

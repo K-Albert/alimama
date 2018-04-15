@@ -27,6 +27,13 @@ dataset3=pd.read_csv('data/dataset3.csv')
 dataset2=pd.read_csv('data/dataset2.csv')
 dataset1=pd.read_csv('data/dataset1.csv')
 #%%
+
+dataset2_pos=dataset2[dataset2['is_trade']==1]
+dataset2_neg=dataset2[dataset2['is_trade']==0]
+
+dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
+dataset2=pd.concat([dataset2_pos,dataset2_neg])
+#%%
 label2=dataset2[['is_trade']]
 label1=dataset1[['is_trade']]
 dataset3_pre=dataset3[['instance_id']]
@@ -37,6 +44,18 @@ dataset2.drop(['is_trade','second_category'],axis=1,inplace=True)
 dataset1.drop(['instance_id'],axis=1,inplace=True)
 dataset2.drop(['instance_id'],axis=1,inplace=True)
 #%%
+#dataset1_pos=dataset1[dataset1['is_trade']==1]
+#dataset1_neg=dataset1[dataset1['is_trade']==0]
+#
+#dataset1_neg=dataset1_neg.sample(frac=0.8,random_state=0,replace=True)
+#dataset1=pd.concat([dataset1_pos,dataset1_neg])
+#
+#dataset2_pos=dataset2[dataset2['is_trade']==1]
+#dataset2_neg=dataset2[dataset2['is_trade']==0]
+#
+#dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
+#dataset2=pd.concat([dataset2_pos,dataset2_neg])
+#%%
 watchlist = [(dataset1, label1)]#watchlist
 #watchlist = [(dataset2, label2)]#watchlist
 model = xgb.XGBClassifier(
@@ -45,18 +64,18 @@ model = xgb.XGBClassifier(
  	     eval_metric='logloss',
  	     gamma=0.1,
  	     min_child_weight=1.1,
- 	     max_depth=5,
+ 	     max_depth=3,
  	     reg_lambda=1,
- 	     subsample=0.7,
- 	     colsample_bytree=0.7,
- 	     colsample_bylevel=0.7,
+ 	     subsample=0.9,
+ 	     colsample_bytree=0.9,
+ 	     colsample_bylevel=0.9,
         learning_rate=0.01,
  	     tree_method='exact',
  	     seed=0,
-        n_estimators=3000 
+        n_estimators=1081 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747
+model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081
 #model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
 """
 用dataset1训练 测试dataset2 0.0818
@@ -69,7 +88,7 @@ feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
 dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
-dataset3_pre.to_csv('20180415_0.0817_xgboost.txt',sep=" ",index=False)
+dataset3_pre.to_csv('20180416_0.0816_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb
@@ -80,6 +99,7 @@ watchlist = [(dataset1, label11)]#watchlist
 #watchlist = [(dataset2, label22)]#watchlist
 
 gbm = lgb.LGBMRegressor(objective='binary',
+                        is_unbalance=True,
                         num_leaves=100,
                         learning_rate=0.01,
                         n_estimators=2000,

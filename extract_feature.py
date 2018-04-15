@@ -260,7 +260,7 @@ user_day_feature3_4_5_6_7=user_day_feature3_4_5_6_7.groupby('user_id').agg('mean
 #用户在 一小时中的 第一次浏览时 购买 占所有购买的比率
 #feature=feature1
 def extract_user_feature(dataset,feature):
-    label=dataset[['user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
+    label=dataset[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
     user=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade','real_hour','real_time']]
 #'user_id' 该用户浏览过的商品数量   
     d=user[['user_id']]
@@ -575,7 +575,11 @@ user3=  extract_user_feature(dataset3,feature3_4_5_6_7)
 user1=pd.merge(user1,user_day_feature1_2_3_4_5,on='user_id',how='left')
 user2=pd.merge(user2,user_day_feature2_3_4_5_6,on='user_id',how='left') 
 user3=pd.merge(user3,user_day_feature3_4_5_6_7,on='user_id',how='left') 
- 
+
+user1=user1.drop('user_id',axis=1) 
+user2=user2.drop('user_id',axis=1) 
+user3=user3.drop('user_id',axis=1) 
+
 #%%  
 user1.to_csv('data/user1.csv',index=None)
 user2.to_csv('data/user2.csv',index=None)
@@ -608,7 +612,7 @@ user3.to_csv('data/user3.csv',index=None)
 """
 #feature=feature1
 def extract_shop_feature(dataset,feature):
-    label=dataset[['shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description']]
+    label=dataset[['instance_id','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description']]
     shop=feature[['instance_id','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level','item_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','shop_id','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','is_trade']]
 #店铺被浏览次数
     d=shop[['shop_id']]
@@ -737,6 +741,9 @@ def extract_shop_feature(dataset,feature):
 shop_feature1=extract_shop_feature(dataset1,feature1_2_3_4_5)
 shop_feature2=extract_shop_feature(dataset2,feature2_3_4_5_6)
 shop_feature3=extract_shop_feature(dataset3,feature3_4_5_6_7)
+shop_feature1=shop_feature1.drop('shop_id',axis=1)
+shop_feature2=shop_feature2.drop('shop_id',axis=1)
+shop_feature3=shop_feature3.drop('shop_id',axis=1)
 
 #%%
 shop_feature1.to_csv('data/shop_feature1.csv',index=None)
@@ -780,7 +787,7 @@ feature窗提取商品特征
 """
 #label窗中出现的到 feature窗中的特征
 def extract_label_merchant_feature(dataset,feature):
-    label=dataset[['item_id','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level']]
+    label=dataset[['instance_id','item_id','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level']]
     merchant=feature[['item_id','item_category_list','item_property_list','item_brand_id','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_id','perdict_category','perdict_property','predict_category_property','is_trade']]
     label['second_category']=label['item_category_list'].apply(splitItemCategory_second) 
     label['item_property_cnt']=label.item_property_list.apply(itemPropertyCnt)  
@@ -964,6 +971,11 @@ def extract_label_merchant_feature(dataset,feature):
 merchant_feature1=extract_label_merchant_feature(dataset1,feature1_2_3_4_5)
 merchant_feature2=extract_label_merchant_feature(dataset2,feature2_3_4_5_6)
 merchant_feature3=extract_label_merchant_feature(dataset3,feature3_4_5_6_7)
+
+merchant_feature1=merchant_feature1.drop('item_id',axis=1)
+merchant_feature2=merchant_feature2.drop('item_id',axis=1)
+merchant_feature3=merchant_feature3.drop('item_id',axis=1)
+
 #%%
 merchant_feature1.to_csv('data/merchant_feature1.csv',index=None)
 merchant_feature2.to_csv('data/merchant_feature2.csv',index=None)
@@ -1068,21 +1080,22 @@ def extract_other_feature(feature,dataset):
     d17=other[['shop_id','shop_score_description']]
     d17=d17.groupby('shop_id').agg('mean').reset_index()
     d17.rename(columns={'shop_score_description':'label_user_look_mean_shop_score_description'},inplace=True)     
-#是不是用户 的最后一次  浏览 user_id  real_time 去merge
-    d18=other[['user_id','real_time']]
-    d19=d18.groupby('user_id').size().reset_index()
+#是不是用户 该 小时的 的最后一次  浏览 user_id  real_time 去merge
+    d18=other[['user_id','real_hour','real_time']]
+    d18=d18.drop_duplicates()
+    d19=d18.groupby(['user_id','real_hour']).size().reset_index()
     d19=d19.rename(columns={0:'cnt'})
-    d19=d19[d19['cnt']!=1]    
-    d18=d18[d18['user_id'].isin(d19['user_id'])]
+    d19=d19[d19['cnt']!=1] 
+    d19=d19.drop_duplicates()
+    d18=pd.merge(d19,d18,on=['user_id','real_hour'],how='inner')
     
-    d20=d18.groupby('user_id').agg('max').reset_index()
-    d20=d20.rename(columns={'real_time':'real_time_max'})
-    
-    d18=pd.merge(d18,d20,on='user_id',how='left')
+    d20=d18.groupby(['user_id','real_hour']).agg('max').reset_index()
+    d20=d20.rename(columns={'real_time':'real_time_max'})    
+    d18=pd.merge(d18,d20,on=['user_id','real_hour'],how='left')
     d18['label_is_latest_time']=(d18['real_time']==d18['real_time_max']).astype('int')
     d18=d18[['user_id','real_time','label_is_latest_time']]
     d18=d18.drop_duplicates()
-#用户 + 在这个时间点之前 有没有浏览过某品牌user_id user_id item_brand_id
+#用户 + 在这个时间点之前(并不局限于该小时) 有没有浏览过某品牌user_id user_id item_brand_id
     d19=other[['user_id','real_time','item_brand_id']]
     d20=d19.groupby(['user_id','item_brand_id']).agg('min').reset_index()
     d20=d20.rename(columns={'real_time':'real_time_min'})
@@ -1122,9 +1135,24 @@ def extract_other_feature(feature,dataset):
     d22=d22[['user_id','real_hour','label_shop_review_num_level_is_highest','shop_review_num_level']]    
     d22=d22.drop_duplicates()
 
-#    商品价格等级 与前n天相比 有没有下降
-    d23=feature[['item_id','item_price_level']]
-    d23=d23.drop_duplicates()
+#    商品价格等级 在n天内 有没有下降过
+    d23=feature[['item_id','item_price_level','real_day']]
+    d23=d23.drop_duplicates(['item_id','item_price_level'])
+    
+    t=d23.groupby('item_id').size().reset_index()
+    t=t.rename(columns={0:'cnt'})
+    t=t[t['cnt']>1]
+    t=d23[d23['item_id'].isin(t['item_id'])]
+    t1=t.groupby('item_id').agg({'real_day':'max'}).reset_index()
+    t1=t1.rename(columns={'real_day':'real_day_max'})
+    t1=pd.merge(t,t1,on='item_id',how='left')
+    t1['is_del']=(t1['real_day']!=t1['real_day_max']).astype('int')
+    t1=pd.merge(d23,t1,on=['real_day','item_id','item_price_level'],how='left')    
+    t1=t1.drop('real_day_max',axis=1)
+    t1=t1.fillna(0)
+    d23=t1[t1['is_del']==0]
+    d23=d23.drop(['is_del','real_day'],axis=1)
+    
     d23=d23.rename(columns={'item_price_level':'item_price_level_before'})
     d24=other[['item_id','item_price_level']]
     d24=d24.drop_duplicates()
@@ -1134,8 +1162,23 @@ def extract_other_feature(feature,dataset):
     d23=d25[['item_id','label_item_price_down']]
     d23=d23.drop_duplicates()
 #    商品 价格等级 与前一天相比 有没有上升
-    d24=feature[['item_id','item_price_level']]
-    d24=d24.drop_duplicates()
+    d24=feature[['item_id','item_price_level','real_day']]
+    d24=d24.drop_duplicates(['item_id','item_price_level'])
+
+    t=d24.groupby('item_id').size().reset_index()
+    t=t.rename(columns={0:'cnt'})
+    t=t[t['cnt']>1]
+    t=d24[d24['item_id'].isin(t['item_id'])]
+    t1=t.groupby('item_id').agg({'real_day':'max'}).reset_index()
+    t1=t1.rename(columns={'real_day':'real_day_max'})
+    t1=pd.merge(t,t1,on='item_id',how='left')
+    t1['is_del']=(t1['real_day']!=t1['real_day_max']).astype('int')
+    t1=pd.merge(d24,t1,on=['real_day','item_id','item_price_level'],how='left')    
+    t1=t1.drop('real_day_max',axis=1)
+    t1=t1.fillna(0)
+    d24=t1[t1['is_del']==0]
+    d24=d24.drop(['is_del','real_day'],axis=1)    
+      
     d24=d24.rename(columns={'item_price_level':'item_price_level_before'})
     d25=other[['item_id','item_price_level']]
     d25=d25.drop_duplicates()
@@ -1145,7 +1188,6 @@ def extract_other_feature(feature,dataset):
     d24=d26[['item_id','label_item_price_up']]
     d24=d24.drop_duplicates()
 #  商品 销量等级、展示次数等级、收藏次数等级
-   
 #  历史上是否 浏览过该item
     d25=feature[['user_id','item_id']]
     d25=d25.drop_duplicates()
@@ -1156,18 +1198,137 @@ def extract_other_feature(feature,dataset):
     d26=pd.merge(other[['user_id','item_id']],d26,on=['user_id','item_id'],how='left')
     d26=d26.fillna(0)
     d26=d26.drop_duplicates()
-#  历史上 是够 浏览过 某品牌
-    sdajjdladjkdjk
-    d25=feature[['user_id','item_id']]
-    d25=d25.drop_duplicates()
-    d26=other[['user_id','item_id']]
-    d26=d26.drop_duplicates()
-    d26=pd.merge(d26,d25,on=['item_id','user_id'],how='inner')  
-    d26['label_item_has_before']=1
-    d26=pd.merge(other[['user_id','item_id']],d26,on=['user_id','item_id'],how='left')
-    d26=d26.fillna(0)
-    d26=d26.drop_duplicates()    
- # 某店铺商品的平均价格等级 有没有下降   
+#  历史上 是否 浏览过 某品牌
+    d27=feature[['user_id','item_brand_id']]
+    d27=d27.drop_duplicates()
+    d28=other[['user_id','item_brand_id']]
+    d28=d28.drop_duplicates()    
+    d28=pd.merge(d28,d27,on=['item_brand_id','user_id'],how='inner')  
+    d28['label_item_brand_has_before']=1
+    d28=pd.merge(other[['user_id','item_brand_id']],d28,on=['user_id','item_brand_id'],how='left')
+    d28=d28.fillna(0)
+    d28=d28.drop_duplicates() 
+# 用户  小时  是一天中 后一个小时吗  !!!!!!!!!!!!!!!这里 还要再考虑一下  有没有前提条件 是 当天分两个小时
+    d29=other[['user_id','real_hour']]
+    d30=d29.groupby('user_id').agg('max').reset_index()
+    d30=d30.rename(columns={'real_hour':'real_hour_max'})
+    
+    d29=pd.merge(d29,d30,on='user_id',how='left')
+    d29['label_is_lastest_hour_of_day']=(d29['real_hour']==d29['real_hour_max']).astype('int')
+    d29=d29[['user_id','real_hour','label_is_lastest_hour_of_day']]
+    d29=d29.drop_duplicates()
+#用户当天  分了好几个小时 浏览   当前是后一个小时
+    d30=other[['user_id','real_hour']]
+    d30=d30.drop_duplicates()
+    d31=d30.groupby(['user_id']).size().reset_index()
+    d31=d31.rename(columns={0:'cnt'})
+    d31=d31[d31['cnt']>1]   
+    d31=pd.merge(d31,d30,on='user_id',how='inner')
+    d31=d31[['user_id','real_hour']]
+    d31=d31.groupby('user_id').agg('max').reset_index()
+    d31=d31.rename(columns={'real_hour':'real_hour_max'})    
+    d30=pd.merge(d30,d31,on=['user_id'],how='left')
+    d30['label_is_lastest_hour_of_day_when_more_than2h']=(d30['real_hour']==d30['real_hour_max']).astype('int')    
+    d30=d30[['user_id','real_hour','label_is_lastest_hour_of_day_when_more_than2h']]
+    d30=d30.drop_duplicates()    
+# 历史上是否浏览 过某城市
+    d31=feature[['user_id','item_city_id']]
+    d31=d31.drop_duplicates()    
+    d32=other[['user_id','item_city_id']]
+    d32=d32.drop_duplicates()        
+    d32=pd.merge(d32,d31,on=['item_city_id','user_id'],how='inner')  
+    d32['label_item_city_has_before']=1
+    d32=pd.merge(other[['user_id','item_city_id']],d32,on=['user_id','item_city_id'],how='left')
+    d32=d32.fillna(0)
+    d32=d32.drop_duplicates()     
+#历史上 用户 浏览某品牌/历史上所有品牌
+    d33=other[['user_id','item_brand_id']]    
+    d34=feature[['user_id','item_brand_id']]
+    d35=d34.groupby('user_id').size().reset_index()
+    d35=d35.rename(columns={0:'user_cnt'})
+    d36=d34.groupby(['user_id','item_brand_id']).size().reset_index()
+    d36=d36.rename(columns={0:'user_brand_cnt'})
+    
+    d33=pd.merge(d33,d35,on='user_id',how='left')
+    d33=pd.merge(d33,d36,on=['user_id','item_brand_id'],how='left')
+    d33['label_user_his_brand_rate']=d33['user_brand_cnt']/d33['user_cnt']
+    d33=d33[['user_id','item_brand_id','label_user_his_brand_rate']]
+    d33=d33.fillna(0)
+    d33=d33.drop_duplicates()
+#历史上 用户  浏览某城市/所有城市  
+    d34=other[['user_id','item_city_id']]    
+    d35=feature[['user_id','item_city_id']]
+    d36=d35.groupby('user_id').size().reset_index()
+    d36=d36.rename(columns={0:'user_cnt'})
+    d37=d35.groupby(['user_id','item_city_id']).size().reset_index()
+    d37=d37.rename(columns={0:'user_city_cnt'})
+    
+    d34=pd.merge(d34,d36,on='user_id',how='left')
+    d34=pd.merge(d34,d37,on=['user_id','item_city_id'],how='left')
+    d34['label_user_his_city_rate']=d34['user_city_cnt']/d34['user_cnt']
+    d34=d34[['user_id','item_city_id','label_user_his_city_rate']]
+    d34=d34.fillna(0)
+    d34=d34.drop_duplicates()    
+ # 某店铺商品的平均价格等级 有没有下降 
+#商品 销量等级有没有上升
+ 
+    d35=feature[['item_id','item_sales_level','real_day']]
+    d35=d35.drop_duplicates(['item_id','item_sales_level'])
+    d35=d35.replace(-1,100)
+
+    t=d35.groupby('item_id').size().reset_index()
+    t=t.rename(columns={0:'cnt'})
+    t=t[t['cnt']>1]
+    t=d35[d35['item_id'].isin(t['item_id'])]
+    t1=t.groupby('item_id').agg({'real_day':'max'}).reset_index()
+    t1=t1.rename(columns={'real_day':'real_day_max'})
+    t1=pd.merge(t,t1,on='item_id',how='left')
+    t1['is_del']=(t1['real_day']!=t1['real_day_max']).astype('int')
+    t1=pd.merge(d35,t1,on=['real_day','item_id','item_sales_level'],how='left')    
+    t1=t1.drop('real_day_max',axis=1)
+    t1=t1.fillna(0)
+    d35=t1[t1['is_del']==0]
+    d35=d35.drop(['is_del','real_day'],axis=1)  
+
+    d35=d35.rename(columns={'item_sales_level':'item_sales_level_before'})    
+    d36=other[['item_id','item_sales_level']]
+    d36=d36.drop_duplicates()
+    d36=d36.rename(columns={'item_sales_level':'item_sales_level_now'})
+    
+    d37=pd.merge(d36,d35,on='item_id',how='inner')
+    d37['label_item_sales_up']=(d37['item_sales_level_now']>d37['item_sales_level_before']).astype('int')
+    d35=d37[['item_id','label_item_sales_up']]
+    d35=d35.drop_duplicates()   
+#商品 收藏次数等级 有没有上升    
+    d36=feature[['item_id','item_collected_level','real_day']]
+    d36=d36.drop_duplicates()
+    d36=d36.replace(-1,100)
+
+    t=d36.groupby('item_id').size().reset_index()
+    t=t.rename(columns={0:'cnt'})
+    t=t[t['cnt']>1]
+    t=d36[d36['item_id'].isin(t['item_id'])]
+    t1=t.groupby('item_id').agg({'real_day':'max'}).reset_index()
+    t1=t1.rename(columns={'real_day':'real_day_max'})
+    t1=pd.merge(t,t1,on='item_id',how='left')
+    t1['is_del']=(t1['real_day']!=t1['real_day_max']).astype('int')
+    t1=pd.merge(d36,t1,on=['real_day','item_id','item_collected_level'],how='left')    
+    t1=t1.drop('real_day_max',axis=1)
+    t1=t1.fillna(0)
+    d36=t1[t1['is_del']==0]
+    d36=d36.drop(['is_del','real_day'],axis=1)  
+    
+    d36=d36.rename(columns={'item_collected_level':'item_collected_level_before'})    
+    d37=other[['item_id','item_collected_level']]
+    d37=d37.drop_duplicates()
+    d37=d37.rename(columns={'item_collected_level':'item_collected_level_now'})
+    
+    d38=pd.merge(d37,d36,on='item_id',how='inner')
+    d38['label_item_collected_up']=(d38['item_collected_level_now']>d38['item_collected_level_before']).astype('int')
+    d36=d38[['item_id','label_item_collected_up']]
+    d36=d36.drop_duplicates()       
+    
+    
     other=pd.merge(other,d,on='user_id',how='left')
     other=pd.merge(other,d1,on='user_id',how='left')
     other=pd.merge(other,d2,on='user_id',how='left')
@@ -1195,13 +1356,21 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d23,on='item_id',how='left')
     other=pd.merge(other,d24,on='item_id',how='left')
     other=pd.merge(other,d26,on=['user_id','item_id'],how='left')
+    other=pd.merge(other,d28,on=['user_id','item_brand_id'],how='left')
+    other=pd.merge(other,d29,on=['user_id','real_hour'],how='left')
+    other=pd.merge(other,d30,on=['user_id','real_hour'],how='left')
+    other=pd.merge(other,d32,on=['user_id','item_city_id'],how='left')
+    other=pd.merge(other,d33,on=['user_id','item_brand_id'],how='left')
+    other=pd.merge(other,d34,on=['user_id','item_city_id'],how='left')
+    other=pd.merge(other,d35,on='item_id',how='left')
+    other=pd.merge(other,d36,on='item_id',how='left')
 
     other=other.drop(['perdict_category','context_id','perdict_property','predict_category_property','context_timestamp','real_time','real_day','real_hour','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
     return other
 #%%
-other1= extract_other_feature(dataset1)
-other2= extract_other_feature(dataset2)
-other3= extract_other_feature(dataset3)
+other1= extract_other_feature(feature1_2_3_4_5,dataset1)
+other2= extract_other_feature(feature2_3_4_5_6,dataset2)
+other3= extract_other_feature(feature3_4_5_6_7,dataset3)
 
 #%%
 """
@@ -1386,6 +1555,7 @@ user_shop1=pd.read_csv('data/user_shop1.csv')
 user_shop2=pd.read_csv('data/user_shop2.csv')   
 user_shop3=pd.read_csv('data/user_shop3.csv') 
 #%%
+
 merchant_feature1=merchant_feature1.drop_duplicates()
 merchant_feature2=merchant_feature2.drop_duplicates()
 merchant_feature3=merchant_feature3.drop_duplicates()
@@ -1398,22 +1568,30 @@ user1=user1.drop_duplicates()
 user2=user2.drop_duplicates()
 user3=user3.drop_duplicates()
 
+user_shop1=user_shop1.drop_duplicates()
+user_shop2=user_shop2.drop_duplicates()
+user_shop3=user_shop3.drop_duplicates()
+
+user_merchent1=user_merchent1.drop_duplicates()
+user_merchent2=user_merchent2.drop_duplicates()
+user_merchent3=user_merchent3.drop_duplicates()
+
 #%%
-dataset1= pd.merge(other1,merchant_feature1,on='item_id',how='left',copy=False)
-dataset1= pd.merge(dataset1,shop_feature1,on='shop_id',how='left',copy=False)
-dataset1= pd.merge(dataset1,user1,on='user_id',how='left',copy=False)
+dataset1= pd.merge(other1,merchant_feature1,on='instance_id',how='left',copy=False)
+dataset1= pd.merge(dataset1,shop_feature1,on='instance_id',how='left',copy=False)
+dataset1= pd.merge(dataset1,user1,on='instance_id',how='left',copy=False)
 dataset1= pd.merge(dataset1,user_merchent1,on='instance_id',how='left',copy=False)
 dataset1= pd.merge(dataset1,user_shop1,on='instance_id',how='left',copy=False)
 
-dataset2= pd.merge(other2,merchant_feature2,on='item_id',how='left')
-dataset2= pd.merge(dataset2,shop_feature2,on='shop_id',how='left')
-dataset2= pd.merge(dataset2,user2,on='user_id',how='left')
+dataset2= pd.merge(other2,merchant_feature2,on='instance_id',how='left')
+dataset2= pd.merge(dataset2,shop_feature2,on='instance_id',how='left')
+dataset2= pd.merge(dataset2,user2,on='instance_id',how='left')
 dataset2= pd.merge(dataset2,user_merchent2,on='instance_id',how='left')
 dataset2= pd.merge(dataset2,user_shop2,on='instance_id',how='left')
 
-dataset3= pd.merge(other3,merchant_feature3,on='item_id',how='left')
-dataset3= pd.merge(dataset3,shop_feature3,on='shop_id',how='left')
-dataset3= pd.merge(dataset3,user3,on='user_id',how='left')
+dataset3= pd.merge(other3,merchant_feature3,on='instance_id',how='left')
+dataset3= pd.merge(dataset3,shop_feature3,on='instance_id',how='left')
+dataset3= pd.merge(dataset3,user3,on='instance_id',how='left')
 dataset3= pd.merge(dataset3,user_merchent3,on='instance_id',how='left')
 dataset3= pd.merge(dataset3,user_shop3,on='instance_id',how='left')
 

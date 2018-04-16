@@ -9,6 +9,7 @@ import time
 import pandas as pd
 import os 
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 os.getcwd() #get current working directory
 os.chdir('F:\\006@天池\\0003@阿里妈妈')#change working directory
 #%%
@@ -73,18 +74,36 @@ def predictPropertyRightNum(s):
         if i in s1:
             predict_right_num=predict_right_num+1
     return predict_right_num
+def splitItemCategory_second(s):
+    s=str(s)
+    s=s.split(';')
+    return s[1]
+def itemPropertyCnt(s):
+    s=str(s)
+    s=s.split(';')
+    return len(s)   
 
 train['real_time'] = pd.to_datetime(train['context_timestamp'].apply(time2cov))
 train['real_hour'] = train['real_time'].dt.hour
 train['real_day'] = train['real_time'].dt.day
 train['perdict_category']=train['predict_category_property'].apply(splitPredicCategory)
 train['perdict_property']=train['predict_category_property'].apply(splitPredicProperty)
+train['second_category'] = train['item_category_list'].apply(splitItemCategory_second) 
 
 test_a['real_time'] = pd.to_datetime(test_a['context_timestamp'].apply(time2cov))
 test_a['real_hour'] = test_a['real_time'].dt.hour
 test_a['real_day'] = test_a['real_time'].dt.day
 test_a['perdict_category']=test_a['predict_category_property'].apply(splitPredicCategory)
 test_a['perdict_property']=test_a['predict_category_property'].apply(splitPredicProperty)
+test_a['second_category'] = test_a['item_category_list'].apply(splitItemCategory_second) 
+
+dataset_all=pd.concat([train,test_a])
+d=pd.get_dummies(dataset_all['second_category'])
+d_train=d.iloc[0:train.iloc[:,0].size,:]
+train=pd.concat([train,d_train],axis=1)
+d_test=d.iloc[train.iloc[:,0].size:,:]
+test_a=pd.concat([test_a,d_test],axis=1)
+
 #18 19 20 21 22
 #feature1=train[train['real_day']<23]
 dataset1=train[train['real_day']==23]
@@ -105,17 +124,6 @@ feature7=train[train['real_day']==24]
 def c_log_loss(y_t,y_p):
     tmp = np.array(y_t) * np.log(np.array(y_p)) + (1 - np.array(y_t)) * np.log(1 - np.array(y_p))
     return -np.sum(tmp)/len(y_t),False
-#%%
-#注意存在三级category但是比较少
-#所有商品一级分类相同
-def splitItemCategory_second(s):
-    s=str(s)
-    s=s.split(';')
-    return s[1]
-def itemPropertyCnt(s):
-    s=str(s)
-    s=s.split(';')
-    return len(s)   
 
 #%%   user
 feature1_2_3_4_5=pd.concat([feature1,feature2,feature3,feature4,feature4],ignore_index=True)

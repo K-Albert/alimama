@@ -38,9 +38,9 @@ label2=dataset2[['is_trade']]
 label1=dataset1[['is_trade']]
 dataset3_pre=dataset3[['instance_id']]
 
-dataset3.drop(['instance_id','second_category'],axis=1,inplace=True)
-dataset1.drop(['is_trade','second_category'],axis=1,inplace=True)
-dataset2.drop(['is_trade','second_category'],axis=1,inplace=True)
+dataset3.drop(['instance_id'],axis=1,inplace=True)
+dataset1.drop(['is_trade'],axis=1,inplace=True)
+dataset2.drop(['is_trade'],axis=1,inplace=True)
 dataset1.drop(['instance_id'],axis=1,inplace=True)
 dataset2.drop(['instance_id'],axis=1,inplace=True)
 #%%
@@ -55,6 +55,10 @@ dataset2.drop(['instance_id'],axis=1,inplace=True)
 #
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
+dataset1=dataset1.drop(['second_category_x','second_category_y'],axis=1)
+dataset2=dataset2.drop(['second_category_x','second_category_y'],axis=1)
+dataset3=dataset3.drop(['second_category_x','second_category_y'],axis=1)
+
 #%%
 watchlist = [(dataset1, label1)]#watchlist
 #watchlist = [(dataset2, label2)]#watchlist
@@ -64,7 +68,7 @@ model = xgb.XGBClassifier(
  	     eval_metric='logloss',
  	     gamma=0.1,
  	     min_child_weight=1.1,
- 	     max_depth=3,
+ 	     max_depth=4,
  	     reg_lambda=1,
  	     subsample=0.9,
  	     colsample_bytree=0.9,
@@ -72,7 +76,7 @@ model = xgb.XGBClassifier(
         learning_rate=0.01,
  	     tree_method='exact',
  	     seed=0,
-        n_estimators=1081 
+        n_estimators=3000 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
 model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081
@@ -107,7 +111,20 @@ gbm = lgb.LGBMRegressor(objective='binary',
                         subsample = 0.9,
                         seed=0
                         )
-
+#model = lgb.LGBMClassifier(
+#    random_state=666,
+#    max_depth=4,
+#    subsample=0.80,
+#    n_estimators=100,
+#    colsample_bytree=0.6,
+##    reg_alpha=0.01,
+#    learning_rate=0.1,
+##    reg_lambda=0.01,
+#    # is_unbalance=True,
+#    # scale_pos_weight=1,
+#    min_child_samples=40,
+#    subsample_freq=2,
+#)
 #gbm = lgb.LGBMRegressor(objective='binary',
 #                        #num_leaves=60,
 #                        #is_unbalance='True',

@@ -190,71 +190,78 @@ feature3_4_5_6_7=pd.concat([feature3,feature4,feature5,feature6,feature7],ignore
 用户活跃时间 
 
 """ 
-def extract_user_day_feature(feature): 
-#用户 是在 一天中 最后一次 浏览时 购买 占所有购买的比率
-    d1=feature[['user_id','real_time','is_trade']]
-    d2=d1.groupby('user_id').size().reset_index()
-    d2=d2.rename(columns={0:'cnt'})
-    d2=d2[d2['cnt']!=1]    
-
-    d1=d1[d1['user_id'].isin(d2['user_id'])]
-    
-    d2=d1.groupby('user_id').agg({'real_time':'max'}).reset_index()
-    d2=d2.rename(columns={'real_time':'real_time_max'})
-    
-    d1=pd.merge(d1,d2,on=['user_id'],how='left')
-    d1['feature_is_latest_time']=(d1['real_time']==d1['real_time_max']).astype('int')
-    d1['label_is_latest_time_buy']=(d1['is_trade']&d1['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
-    d2=d1.groupby('user_id').agg({'label_is_latest_time_buy':'sum','is_trade':'sum'}).reset_index()
-    d2=d2[d2['is_trade']>0]
-    d2=d2.rename(columns={'label_is_latest_time_buy':'label_is_latest_time_buy_sum','is_trade':'buy_sum'})
-    d2['user_per_day_trans_rate']=d2['label_is_latest_time_buy_sum']/d2['buy_sum']
-        
-    d1=pd.merge(d1,d2,on='user_id',how='left')
-    d1=d1[['user_id','label_is_latest_time_buy_sum','user_per_day_trans_rate']]    
-    d1=d1.drop_duplicates()
-#用户 在一小时中  最后一次 购买转换率
-    d3=feature[['user_id','real_time','real_hour','is_trade']]
-    d4=d3.groupby('user_id').size().reset_index()
-    d4=d4.rename(columns={0:'cnt'})
-    d4=d4[d4['cnt']!=1]    
-
-    d3=d3[d3['user_id'].isin(d4['user_id'])]
-    
-    d4=d3.groupby(['user_id','real_hour']).agg({'real_time':'max'}).reset_index()
-    d4=d4.rename(columns={'real_time':'real_time_max'})
-    
-    d3=pd.merge(d3,d4,on=['user_id','real_hour'],how='left')
-    d3['feature_is_latest_time']=(d3['real_time']==d3['real_time_max']).astype('int')
-    d3['feature_hour_is_latest_time_buy']=(d3['is_trade']&d3['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
-      
-    d4=d3.groupby('user_id').agg({'feature_hour_is_latest_time_buy':'sum','is_trade':'sum'}).reset_index()
-    d4=d4[d4['is_trade']>0]
-    d4=d4.rename(columns={'feature_hour_is_latest_time_buy':'feature_is_latest_time_buy_sum','is_trade':'buy_sum'})
-    d4['user_per_hour_trans_rate']=d4['feature_is_latest_time_buy_sum']/d4['buy_sum']
-        
-    d3=pd.merge(d3,d4,on=['user_id'],how='left')
-    d3=d3[['user_id','feature_is_latest_time_buy_sum','user_per_hour_trans_rate']]    
-    d3=d3.drop_duplicates()
-    d=pd.merge(d1,d3,on='user_id',how='left')
-    return d
-#%%
-user_day_feature1= extract_user_day_feature(feature1).replace(np.nan,0) 
-user_day_feature2= extract_user_day_feature(feature2).replace(np.nan,0)   
-user_day_feature3= extract_user_day_feature(feature3).replace(np.nan,0)   
-user_day_feature4= extract_user_day_feature(feature4).replace(np.nan,0)   
-user_day_feature5= extract_user_day_feature(feature5).replace(np.nan,0)   
-user_day_feature6= extract_user_day_feature(feature6).replace(np.nan,0)   
-user_day_feature7= extract_user_day_feature(feature7).replace(np.nan,0) 
- 
-user_day_feature1_2_3_4_5=pd.concat([user_day_feature1,user_day_feature2,user_day_feature3,user_day_feature4,user_day_feature5])
-user_day_feature1_2_3_4_5=user_day_feature1_2_3_4_5.groupby('user_id').agg('mean').reset_index()
-
-user_day_feature2_3_4_5_6=pd.concat([user_day_feature2,user_day_feature3,user_day_feature4,user_day_feature5,user_day_feature6])
-user_day_feature2_3_4_5_6=user_day_feature2_3_4_5_6.groupby('user_id').agg('mean').reset_index()
- 
-user_day_feature3_4_5_6_7=pd.concat([user_day_feature3,user_day_feature4,user_day_feature5,user_day_feature6,user_day_feature7])
-user_day_feature3_4_5_6_7=user_day_feature3_4_5_6_7.groupby('user_id').agg('mean').reset_index()
+#def extract_user_day_feature(feature): 
+##label 中的用户 是在 一天中 最后一次 浏览时 购买 占所有购买的比率
+#    label =dataset[['user_id']]
+#    label=label.drop_duplicates()
+#    d1=feature[['user_id','real_time','is_trade']]
+#    d1=d1[d1.user_id.isin(label.user_id)]
+#    d2=d1.groupby('user_id').size().reset_index()
+#    d2=d2.rename(columns={0:'cnt'})
+#    d2=d2[d2['cnt']!=1]    
+#
+#    d1=d1[d1['user_id'].isin(d2['user_id'])]
+#    
+#    d2=d1.groupby('user_id').agg({'real_time':'max'}).reset_index()
+#    d2=d2.rename(columns={'real_time':'real_time_max'})
+#    
+#    d1=pd.merge(d1,d2,on=['user_id'],how='left')
+#    d1['feature_is_latest_time']=(d1['real_time']==d1['real_time_max']).astype('int')
+#    d1['label_is_latest_time_buy']=(d1['is_trade']&d1['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
+#    d2=d1.groupby('user_id').agg({'label_is_latest_time_buy':'sum','is_trade':'sum'}).reset_index()
+#    d2=d2[d2['is_trade']>0]
+#    d2=d2.rename(columns={'label_is_latest_time_buy':'label_is_latest_time_buy_sum','is_trade':'buy_sum'})
+#    d2['user_per_day_trans_rate']=d2['label_is_latest_time_buy_sum']/d2['buy_sum']
+#        
+#    d1=pd.merge(d1,d2,on='user_id',how='left')
+#    d1=d1[['user_id','label_is_latest_time_buy_sum','user_per_day_trans_rate']]    
+#    d1=d1.drop_duplicates()
+#    d1=d1.fillna(0)
+##用户 在一小时中  最后一次 购买转换率
+#    d3=feature[['user_id','real_time','real_hour','is_trade']]
+#    d3=d3[d3.user_id.isin(label.user_id)]
+#
+#    d4=d3.groupby('user_id').size().reset_index()
+#    d4=d4.rename(columns={0:'cnt'})
+#    d4=d4[d4['cnt']!=1]    
+#
+#    d3=d3[d3['user_id'].isin(d4['user_id'])]
+#    
+#    d4=d3.groupby(['user_id','real_hour']).agg({'real_time':'max'}).reset_index()
+#    d4=d4.rename(columns={'real_time':'real_time_max'})
+#    
+#    d3=pd.merge(d3,d4,on=['user_id','real_hour'],how='left')
+#    d3['feature_is_latest_time']=(d3['real_time']==d3['real_time_max']).astype('int')
+#    d3['feature_hour_is_latest_time_buy']=(d3['is_trade']&d3['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
+#      
+#    d4=d3.groupby('user_id').agg({'feature_hour_is_latest_time_buy':'sum','is_trade':'sum'}).reset_index()
+#    d4=d4[d4['is_trade']>0]
+#    d4=d4.rename(columns={'feature_hour_is_latest_time_buy':'feature_is_latest_time_buy_sum','is_trade':'buy_sum'})
+#    d4['user_per_hour_trans_rate']=d4['feature_is_latest_time_buy_sum']/d4['buy_sum']
+#        
+#    d3=pd.merge(d3,d4,on=['user_id'],how='left')
+#    d3=d3[['user_id','feature_is_latest_time_buy_sum','user_per_hour_trans_rate']]    
+#    d3=d3.drop_duplicates()
+#    d3=d3.fillna(0)
+#    d=pd.merge(d1,d3,on='user_id',how='left')
+#    return d
+##%%
+#user_day_feature1= extract_user_day_feature(feature1).replace(np.nan,0) 
+#user_day_feature2= extract_user_day_feature(feature2).replace(np.nan,0)   
+#user_day_feature3= extract_user_day_feature(feature3).replace(np.nan,0)   
+#user_day_feature4= extract_user_day_feature(feature4).replace(np.nan,0)   
+#user_day_feature5= extract_user_day_feature(feature5).replace(np.nan,0)   
+#user_day_feature6= extract_user_day_feature(feature6).replace(np.nan,0)   
+#user_day_feature7= extract_user_day_feature(feature7).replace(np.nan,0) 
+# 
+#user_day_feature1_2_3_4_5=pd.concat([user_day_feature1,user_day_feature2,user_day_feature3,user_day_feature4,user_day_feature5])
+#user_day_feature1_2_3_4_5=user_day_feature1_2_3_4_5.groupby('user_id').agg('mean').reset_index()
+#
+#user_day_feature2_3_4_5_6=pd.concat([user_day_feature2,user_day_feature3,user_day_feature4,user_day_feature5,user_day_feature6])
+#user_day_feature2_3_4_5_6=user_day_feature2_3_4_5_6.groupby('user_id').agg('mean').reset_index()
+# 
+#user_day_feature3_4_5_6_7=pd.concat([user_day_feature3,user_day_feature4,user_day_feature5,user_day_feature6,user_day_feature7])
+#user_day_feature3_4_5_6_7=user_day_feature3_4_5_6_7.groupby('user_id').agg('mean').reset_index()
 
 #%%
 #用户在 一小时中的 第一次浏览时 购买 占所有购买的比率
@@ -486,6 +493,64 @@ def extract_user_feature(dataset,feature):
     d40=d40.groupby('user_gender_id').agg('sum').reset_index()
     d40['user_gender_buy_rate']=d40['is_trade']/d40['cnt']
     d40=d40[['user_gender_id','user_gender_buy_rate']]
+
+    d74=user[['user_gender_id','is_trade','item_price_level']]
+    d74=d74[d74['is_trade']==1][['user_gender_id','item_price_level']]
+    d74=round(d74.groupby('user_gender_id').agg('mean').reset_index())
+    d74.columns=['user_gender_id','user_gender_buy_mean_item_price_level'] 
+    
+    d75=user[['user_gender_id','is_trade','item_sales_level']]
+    d75=d75[d75['is_trade']==1][['user_gender_id','item_sales_level']]
+    d75=round(d75.groupby('user_gender_id').agg('mean').reset_index())
+    d75.columns=['user_gender_id','user_gender_buy_mean_item_sales_level'] 
+
+    d76=user[['user_gender_id','is_trade','item_collected_level']]
+    d76=d76[d76['is_trade']==1][['user_gender_id','item_collected_level']]
+    d76=round(d76.groupby('user_gender_id').agg('mean').reset_index())
+    d76.columns=['user_gender_id','user_gender_buy_mean_item_collected_level'] 
+
+    d77=user[['user_gender_id','is_trade','item_pv_level']]
+    d77=d77[d77['is_trade']==1][['user_gender_id','item_pv_level']]
+    d77=round(d77.groupby('user_gender_id').agg('mean').reset_index())
+    d77.columns=['user_gender_id','user_gender_buy_mean_item_pv_level']   
+    
+    d78=user[['user_gender_id','is_trade','shop_review_num_level']]
+    d78=d78[d78['is_trade']==1][['user_gender_id','shop_review_num_level']]
+    d78=d78.groupby('user_gender_id').agg('mean').reset_index()
+    d78.columns=['user_gender_id','user_gender_buy_mean_shop_review_num_level']    
+
+    d79=user[['user_gender_id','is_trade','shop_review_num_level']]
+    d79=d79[d79['is_trade']==1][['user_gender_id','shop_review_num_level']]
+    d79=d79.groupby('user_gender_id').agg('mean').reset_index()
+    d79.columns=['user_gender_id','user_gender_buy_mean_shop_review_num_level']    
+    
+    d80=user[['user_gender_id','is_trade','shop_review_positive_rate']]
+    d80=d80[d80['is_trade']==1][['user_gender_id','shop_review_positive_rate']]
+    d80=d80.groupby('user_gender_id').agg('mean').reset_index()
+    d80.columns=['user_gender_id','user_gender_buy_mean_shop_review_positive_rate']    
+    
+    d81=user[['user_gender_id','is_trade','shop_star_level']]
+    d81=d81[d81['is_trade']==1][['user_gender_id','shop_star_level']]
+    d81=d81.groupby('user_gender_id').agg('mean').reset_index()
+    d81.columns=['user_gender_id','user_gender_buy_mean_shop_star_level']    
+    
+    d82=user[['user_gender_id','is_trade','shop_score_service']]
+    d82=d82[d82['is_trade']==1][['user_gender_id','shop_score_service']]
+    d82=d82.groupby('user_gender_id').agg('mean').reset_index()
+    d82.columns=['user_gender_id','user_gender_buy_mean_shop_score_service']    
+    
+    d83=user[['user_gender_id','is_trade','shop_score_delivery']]
+    d83=d83[d83['is_trade']==1][['user_gender_id','shop_score_delivery']]
+    d83=d83.groupby('user_gender_id').agg('mean').reset_index()
+    d83.columns=['user_gender_id','user_gender_buy_mean_shop_score_delivery']    
+    
+    d84=user[['user_gender_id','is_trade','shop_score_description']]
+    d84=d84[d84['is_trade']==1][['user_gender_id','shop_score_description']]
+    d84=d84.groupby('user_gender_id').agg('mean').reset_index()
+    d84.columns=['user_gender_id','user_gender_buy_mean_shop_score_description']      
+ 
+
+    
 # user_age_level 不同年龄用户  成交率
     d41=user[['user_age_level','is_trade']]
     d41['cnt']=1
@@ -496,19 +561,170 @@ def extract_user_feature(dataset,feature):
     d42=user[['user_age_level','is_trade','shop_score_description']]
     d42=d42[d42['is_trade']==1][['user_age_level','shop_score_description']]
     d42=d42.groupby('user_age_level').agg('mean').reset_index()
-    d42.columns=['user_age_level','user_age_buy_mean_shop_score_description']  
+    d42.columns=['user_age_level','user_age_buy_mean_shop_score_description'] 
+    
+    d45=user[['user_age_level','is_trade','shop_review_num_level']]
+    d45=d45[d45['is_trade']==1][['user_age_level','shop_review_num_level']]
+    d45=d45.groupby('user_age_level').agg('mean').reset_index()
+    d45.columns=['user_age_level','user_age_buy_mean_shop_review_num_level']     
+
+    d46=user[['user_age_level','is_trade','shop_review_positive_rate']]
+    d46=d46[d46['is_trade']==1][['user_age_level','shop_review_positive_rate']]
+    d46=d46.groupby('user_age_level').agg('mean').reset_index()
+    d46.columns=['user_age_level','user_age_buy_mean_shop_review_positive_rate']     
+
+    d47=user[['user_age_level','is_trade','shop_star_level']]
+    d47=d47[d47['is_trade']==1][['user_age_level','shop_star_level']]
+    d47=d47.groupby('user_age_level').agg('mean').reset_index()
+    d47.columns=['user_age_level','user_age_buy_mean_shop_star_level']   
+
+    d48=user[['user_age_level','is_trade','shop_score_service']]
+    d48=d48[d48['is_trade']==1][['user_age_level','shop_score_service']]
+    d48=d48.groupby('user_age_level').agg('mean').reset_index()
+    d48.columns=['user_age_level','user_age_buy_mean_shop_score_service']  
+
+    d49=user[['user_age_level','is_trade','shop_score_service']]
+    d49=d49[d49['is_trade']==1][['user_age_level','shop_score_service']]
+    d49=d49.groupby('user_age_level').agg('mean').reset_index()
+    d49.columns=['user_age_level','user_age_buy_mean_shop_score_service']  
+
+    d50=user[['user_age_level','is_trade','shop_score_delivery']]
+    d50=d50[d50['is_trade']==1][['user_age_level','shop_score_delivery']]
+    d50=d50.groupby('user_age_level').agg('mean').reset_index()
+    d50.columns=['user_age_level','user_age_buy_mean_shop_score_delivery']   
+
+    d51=user[['user_age_level','is_trade','item_price_level']]
+    d51=d51[d51['is_trade']==1][['user_age_level','item_price_level']]
+    d51=round(d51.groupby('user_age_level').agg('mean').reset_index())
+    d51.columns=['user_age_level','user_age_buy_mean_item_price_level']
+
+    d52=user[['user_age_level','is_trade','item_sales_level']]
+    d52=d52[d52['is_trade']==1][['user_age_level','item_sales_level']]
+    d52=round(d52.groupby('user_age_level').agg('mean').reset_index())
+    d52.columns=['user_age_level','user_age_buy_mean_item_sales_level']  
+
+    d53=user[['user_age_level','is_trade','item_collected_level']]
+    d53=d53[d53['is_trade']==1][['user_age_level','item_collected_level']]
+    d53=round(d53.groupby('user_age_level').agg('mean').reset_index())
+    d53.columns=['user_age_level','user_age_buy_mean_item_collected_level']  
+
+    d54=user[['user_age_level','is_trade','item_pv_level']]
+    d54=d54[d54['is_trade']==1][['user_age_level','item_pv_level']]
+    d54=round(d54.groupby('user_age_level').agg('mean').reset_index())
+    d54.columns=['user_age_level','user_age_buy_mean_item_pv_level']  
+       
 #user_occupation_id 不同职业用户   
     d43=user[['user_occupation_id','is_trade']]
     d43['cnt']=1
     d43=d43.groupby('user_occupation_id').agg('sum').reset_index()
     d43['user_occupation_buy_rate']=d43['is_trade']/d43['cnt']
     d43=d43[['user_occupation_id','user_occupation_buy_rate']] 
+
+    d64=user[['user_occupation_id','is_trade','item_price_level']]
+    d64=d64[d64['is_trade']==1][['user_occupation_id','item_price_level']]
+    d64=round(d64.groupby('user_occupation_id').agg('mean').reset_index())
+    d64.columns=['user_occupation_id','user_occupation_buy_mean_item_price_level'] 
+
+    d65=user[['user_occupation_id','is_trade','item_sales_level']]
+    d65=d65[d65['is_trade']==1][['user_occupation_id','item_sales_level']]
+    d65=round(d65.groupby('user_occupation_id').agg('mean').reset_index())
+    d65.columns=['user_occupation_id','user_occupation_buy_mean_item_sales_level'] 
+    
+    d66=user[['user_occupation_id','is_trade','item_collected_level']]
+    d66=d66[d66['is_trade']==1][['user_occupation_id','item_collected_level']]
+    d66=round(d66.groupby('user_occupation_id').agg('mean').reset_index())
+    d66.columns=['user_occupation_id','user_occupation_buy_mean_item_collected_level'] 
+    
+    d67=user[['user_occupation_id','is_trade','item_pv_level']]
+    d67=d67[d67['is_trade']==1][['user_occupation_id','item_pv_level']]
+    d67=round(d67.groupby('user_occupation_id').agg('mean').reset_index())
+    d67.columns=['user_occupation_id','user_occupation_buy_mean_item_pv_level'] 
+    
+    d68=user[['user_occupation_id','is_trade','shop_review_num_level']]
+    d68=d68[d68['is_trade']==1][['user_occupation_id','shop_review_num_level']]
+    d68=d68.groupby('user_occupation_id').agg('mean').reset_index()
+    d68.columns=['user_occupation_id','user_occupation_buy_mean_shop_review_num_level'] 
+    
+    d69=user[['user_occupation_id','is_trade','shop_review_positive_rate']]
+    d69=d69[d69['is_trade']==1][['user_occupation_id','shop_review_positive_rate']]
+    d69=d69.groupby('user_occupation_id').agg('mean').reset_index()
+    d69.columns=['user_occupation_id','user_occupation_buy_mean_shop_review_positive_rate'] 
+    
+    d70=user[['user_occupation_id','is_trade','shop_star_level']]
+    d70=d70[d70['is_trade']==1][['user_occupation_id','shop_star_level']]
+    d70=d70.groupby('user_occupation_id').agg('mean').reset_index()
+    d70.columns=['user_occupation_id','user_occupation_buy_mean_shop_star_level'] 
+    
+    d71=user[['user_occupation_id','is_trade','shop_score_service']]
+    d71=d71[d71['is_trade']==1][['user_occupation_id','shop_score_service']]
+    d71=d71.groupby('user_occupation_id').agg('mean').reset_index()
+    d71.columns=['user_occupation_id','user_occupation_buy_mean_shop_score_service'] 
+    
+    d72=user[['user_occupation_id','is_trade','shop_score_delivery']]
+    d72=d72[d72['is_trade']==1][['user_occupation_id','shop_score_delivery']]
+    d72=d72.groupby('user_occupation_id').agg('mean').reset_index()
+    d72.columns=['user_occupation_id','user_occupation_buy_mean_shop_score_delivery'] 
+    
+    d73=user[['user_occupation_id','is_trade','shop_score_description']]
+    d73=d73[d73['is_trade']==1][['user_occupation_id','shop_score_description']]
+    d73=d73.groupby('user_occupation_id').agg('mean').reset_index()
+    d73.columns=['user_occupation_id','user_occupation_buy_mean_shop_score_description'] 
 #user_star_level 不同星级用户成交率    
     d44=user[['user_star_level','is_trade']]
     d44['cnt']=1
     d44=d44.groupby('user_star_level').agg('sum').reset_index()
     d44['user_star_buy_rate']=d44['is_trade']/d44['cnt']
-    d44=d44[['user_star_level','user_star_buy_rate']]     
+    d44=d44[['user_star_level','user_star_buy_rate']] 
+
+    d55=user[['user_star_level','is_trade','item_price_level']]
+    d55=d55[d55['is_trade']==1][['user_star_level','item_price_level']]
+    d55=round(d55.groupby('user_star_level').agg('mean').reset_index())
+    d55.columns=['user_star_level','user_star_buy_mean_item_price_level']     
+    
+    d56=user[['user_star_level','is_trade','item_sales_level']]
+    d56=d56[d56['is_trade']==1][['user_star_level','item_sales_level']]
+    d56=round(d56.groupby('user_star_level').agg('mean').reset_index())
+    d56.columns=['user_star_level','user_star_buy_mean_item_sales_level'] 
+    
+    d57=user[['user_star_level','is_trade','item_collected_level']]
+    d57=d57[d57['is_trade']==1][['user_star_level','item_collected_level']]
+    d57=round(d57.groupby('user_star_level').agg('mean').reset_index())
+    d57.columns=['user_star_level','user_star_buy_mean_item_collected_level']   
+
+    d58=user[['user_star_level','is_trade','item_pv_level']]
+    d58=d58[d58['is_trade']==1][['user_star_level','item_pv_level']]
+    d58=round(d58.groupby('user_star_level').agg('mean').reset_index())
+    d58.columns=['user_star_level','user_star_buy_mean_item_pv_level']   
+
+    d59=user[['user_star_level','is_trade','shop_review_num_level']]
+    d59=d59[d59['is_trade']==1][['user_star_level','shop_review_num_level']]
+    d59=d59.groupby('user_star_level').agg('mean').reset_index()
+    d59.columns=['user_star_level','user_star_buy_mean_shop_review_num_level'] 
+
+    d60=user[['user_star_level','is_trade','shop_review_positive_rate']]
+    d60=d60[d60['is_trade']==1][['user_star_level','shop_review_positive_rate']]
+    d60=d60.groupby('user_star_level').agg('mean').reset_index()
+    d60.columns=['user_star_level','user_star_buy_mean_shop_review_positive_rate'] 
+
+    d61=user[['user_star_level','is_trade','shop_star_level']]
+    d61=d61[d61['is_trade']==1][['user_star_level','shop_star_level']]
+    d61=d61.groupby('user_star_level').agg('mean').reset_index()
+    d61.columns=['user_star_level','user_star_buy_mean_shop_star_level'] 
+
+    d61=user[['user_star_level','is_trade','shop_score_service']]
+    d61=d61[d61['is_trade']==1][['user_star_level','shop_score_service']]
+    d61=d61.groupby('user_star_level').agg('mean').reset_index()
+    d61.columns=['user_star_level','user_star_buy_mean_shop_score_service'] 
+
+    d62=user[['user_star_level','is_trade','shop_score_delivery']]
+    d62=d62[d62['is_trade']==1][['user_star_level','shop_score_delivery']]
+    d62=d62.groupby('user_star_level').agg('mean').reset_index()
+    d62.columns=['user_star_level','user_star_buy_mean_shop_score_delivery'] 
+
+    d63=user[['user_star_level','is_trade','shop_score_description']]
+    d63=d63[d63['is_trade']==1][['user_star_level','shop_score_description']]
+    d63=d63.groupby('user_star_level').agg('mean').reset_index()
+    d63.columns=['user_star_level','user_star_buy_mean_shop_score_description']         
 #    def sortFrequest(x):
 #       x=x.groupby('real_hour').size().reset_index() 
 #       x.rename(columns={0:'cnt'},inplace=True)
@@ -565,6 +781,51 @@ def extract_user_feature(dataset,feature):
     label=pd.merge(label,d41,on='user_age_level',how='left')
     label=pd.merge(label,d42,on='user_age_level',how='left')
     label=pd.merge(label,d43,on='user_occupation_id',how='left')
+    label=pd.merge(label,d44,on='user_star_level',how='left')   
+#    label=pd.merge(label,d45,on='user_age_level',how='left')
+#    label=pd.merge(label,d46,on='user_age_level',how='left')
+#    label=pd.merge(label,d47,on='user_age_level',how='left')
+#    label=pd.merge(label,d48,on='user_age_level',how='left')
+#    label=pd.merge(label,d49,on='user_age_level',how='left')
+#    label=pd.merge(label,d50,on='user_age_level',how='left')
+#    label=pd.merge(label,d51,on='user_age_level',how='left')
+#    label=pd.merge(label,d52,on='user_age_level',how='left')
+#    label=pd.merge(label,d53,on='user_age_level',how='left')
+#    label=pd.merge(label,d54,on='user_age_level',how='left')
+#    label=pd.merge(label,d55,on='user_star_level',how='left')   
+#    label=pd.merge(label,d56,on='user_star_level',how='left')   
+#    label=pd.merge(label,d57,on='user_star_level',how='left')   
+#    label=pd.merge(label,d58,on='user_star_level',how='left')   
+#    label=pd.merge(label,d59,on='user_star_level',how='left')   
+#    label=pd.merge(label,d60,on='user_star_level',how='left')   
+#    label=pd.merge(label,d61,on='user_star_level',how='left')   
+#    label=pd.merge(label,d62,on='user_star_level',how='left')   
+#    label=pd.merge(label,d63,on='user_star_level',how='left')   
+
+#    label=pd.merge(label,d64,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d65,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d66,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d67,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d68,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d69,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d70,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d71,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d72,on='user_occupation_id',how='left')
+#    label=pd.merge(label,d73,on='user_occupation_id',how='left')
+#
+#    label=pd.merge(label,d74,on='user_gender_id',how='left')
+#    label=pd.merge(label,d75,on='user_gender_id',how='left')
+#    label=pd.merge(label,d76,on='user_gender_id',how='left')
+#    label=pd.merge(label,d77,on='user_gender_id',how='left')
+#    label=pd.merge(label,d78,on='user_gender_id',how='left')
+#    label=pd.merge(label,d79,on='user_gender_id',how='left')
+#    label=pd.merge(label,d80,on='user_gender_id',how='left')
+#    label=pd.merge(label,d81,on='user_gender_id',how='left')
+#    label=pd.merge(label,d82,on='user_gender_id',how='left')
+#    label=pd.merge(label,d83,on='user_gender_id',how='left')
+#    label=pd.merge(label,d84,on='user_gender_id',how='left')
+
+
 #    label=pd.merge(label,d44,on='user_star_level',how='left')
     return label
 #%%
@@ -572,9 +833,9 @@ user1=  extract_user_feature(dataset1,feature1_2_3_4_5)
 user2=  extract_user_feature(dataset2,feature2_3_4_5_6)    
 user3=  extract_user_feature(dataset3,feature3_4_5_6_7) 
 
-user1=pd.merge(user1,user_day_feature1_2_3_4_5,on='user_id',how='left')
-user2=pd.merge(user2,user_day_feature2_3_4_5_6,on='user_id',how='left') 
-user3=pd.merge(user3,user_day_feature3_4_5_6_7,on='user_id',how='left') 
+#user1=pd.merge(user1,user_day_feature1_2_3_4_5,on='user_id',how='left')
+#user2=pd.merge(user2,user_day_feature2_3_4_5_6,on='user_id',how='left') 
+#user3=pd.merge(user3,user_day_feature3_4_5_6_7,on='user_id',how='left') 
 
 user1=user1.drop('user_id',axis=1) 
 user2=user2.drop('user_id',axis=1) 
@@ -1081,6 +1342,21 @@ def extract_other_feature(feature,dataset):
     d17=d17.groupby('shop_id').agg('mean').reset_index()
     d17.rename(columns={'shop_score_description':'label_user_look_mean_shop_score_description'},inplace=True)     
 #是不是用户 该 小时的 的最后一次  浏览 user_id  real_time 去merge
+#    d18=other[['user_id','real_hour','real_time']]
+#    d18=d18.drop_duplicates()
+#    d19=d18.groupby(['user_id','real_hour']).size().reset_index()
+#    d19=d19.rename(columns={0:'cnt'})
+#    d19=d19[d19['cnt']!=1] 
+#    d19=d19.drop_duplicates()
+#    d18=pd.merge(d19,d18,on=['user_id','real_hour'],how='inner')
+#    
+#    d20=d18.groupby(['user_id','real_hour']).agg('max').reset_index()
+#    d20=d20.rename(columns={'real_time':'real_time_max'})    
+#    d18=pd.merge(d18,d20,on=['user_id','real_hour'],how='left')
+#    d18['label_is_latest_time']=(d18['real_time']==d18['real_time_max']).astype('int')
+#    d18=d18[['user_id','real_time','label_is_latest_time']]
+#    d18=d18.drop_duplicates()
+# 现在 是不是 用户当天 当小时最后一次电击
     d18=other[['user_id','real_hour','real_time']]
     d18=d18.drop_duplicates()
     d19=d18.groupby(['user_id','real_hour']).size().reset_index()
@@ -1094,7 +1370,7 @@ def extract_other_feature(feature,dataset):
     d18=pd.merge(d18,d20,on=['user_id','real_hour'],how='left')
     d18['label_is_latest_time']=(d18['real_time']==d18['real_time_max']).astype('int')
     d18=d18[['user_id','real_time','label_is_latest_time']]
-    d18=d18.drop_duplicates()
+    d18=d18.drop_duplicates()    
 #用户 + 在这个时间点之前(并不局限于该小时) 有没有浏览过某品牌user_id user_id item_brand_id
     d19=other[['user_id','real_time','item_brand_id']]
     d20=d19.groupby(['user_id','item_brand_id']).agg('min').reset_index()
@@ -1217,20 +1493,28 @@ def extract_other_feature(feature,dataset):
     d29['label_is_lastest_hour_of_day']=(d29['real_hour']==d29['real_hour_max']).astype('int')
     d29=d29[['user_id','real_hour','label_is_lastest_hour_of_day']]
     d29=d29.drop_duplicates()
+    d29=other[['user_id','real_hour']]
+    d30=d29.groupby('user_id').agg('max').reset_index()
+    d30=d30.rename(columns={'real_hour':'real_hour_max'})
+    
+    d29=pd.merge(d29,d30,on='user_id',how='left')
+    d29['label_is_lastest_hour_of_day']=(d29['real_hour']==d29['real_hour_max']).astype('int')
+    d29=d29[['user_id','real_hour','label_is_lastest_hour_of_day']]
+    d29=d29.drop_duplicates()    
 #用户当天  分了好几个小时 浏览   当前是后一个小时
-    d30=other[['user_id','real_hour']]
-    d30=d30.drop_duplicates()
-    d31=d30.groupby(['user_id']).size().reset_index()
-    d31=d31.rename(columns={0:'cnt'})
-    d31=d31[d31['cnt']>1]   
-    d31=pd.merge(d31,d30,on='user_id',how='inner')
-    d31=d31[['user_id','real_hour']]
-    d31=d31.groupby('user_id').agg('max').reset_index()
-    d31=d31.rename(columns={'real_hour':'real_hour_max'})    
-    d30=pd.merge(d30,d31,on=['user_id'],how='left')
-    d30['label_is_lastest_hour_of_day_when_more_than2h']=(d30['real_hour']==d30['real_hour_max']).astype('int')    
-    d30=d30[['user_id','real_hour','label_is_lastest_hour_of_day_when_more_than2h']]
-    d30=d30.drop_duplicates()    
+#    d30=other[['user_id','real_hour']]
+#    d30=d30.drop_duplicates()
+#    d31=d30.groupby(['user_id']).size().reset_index()
+#    d31=d31.rename(columns={0:'cnt'})
+#    d31=d31[d31['cnt']>1]   
+#    d31=pd.merge(d31,d30,on='user_id',how='inner')
+#    d31=d31[['user_id','real_hour']]
+#    d31=d31.groupby('user_id').agg('max').reset_index()
+#    d31=d31.rename(columns={'real_hour':'real_hour_max'})    
+#    d30=pd.merge(d30,d31,on=['user_id'],how='left')
+#    d30['label_is_lastest_hour_of_day_when_more_than2h']=(d30['real_hour']==d30['real_hour_max']).astype('int')    
+#    d30=d30[['user_id','real_hour','label_is_lastest_hour_of_day_when_more_than2h']]
+#    d30=d30.drop_duplicates()    
 # 历史上是否浏览 过某城市
     d31=feature[['user_id','item_city_id']]
     d31=d31.drop_duplicates()    
@@ -1328,6 +1612,136 @@ def extract_other_feature(feature,dataset):
     d36=d38[['item_id','label_item_collected_up']]
     d36=d36.drop_duplicates()       
     
+#历史上  用户在 一个小时中最后一次  点击发生购买的几率 用户 在一小时中  最后一次 购买转换率
+    d40=feature[['user_id','real_time','real_hour','is_trade']]
+    d40['cnt']=1
+    
+    d41=d40.groupby('user_id').size().reset_index()
+    d41=d41.rename(columns={0:'cnt'})
+    d41=d41[d41['cnt']!=1]    
+
+    d40=d40[d40['user_id'].isin(d41['user_id'])]
+    
+    d41=d40.groupby(['user_id','real_hour']).agg({'real_time':'max'}).reset_index()
+    d41=d41.rename(columns={'real_time':'real_time_max'})
+    
+    d40=pd.merge(d40,d41,on=['user_id','real_hour'],how='left')
+    d40['feature_is_latest_time']=(d40['real_time']==d40['real_time_max']).astype('int')
+    d40['feature_hour_is_latest_time_buy']=(d40['is_trade']&d40['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
+      
+    d41=d40.groupby('user_id').agg({'feature_hour_is_latest_time_buy':'sum','is_trade':'sum','cnt':'sum'}).reset_index()
+    d41=d41[d41['is_trade']>0]
+    d41=d41.rename(columns={'feature_hour_is_latest_time_buy':'feature_is_latest_time_buy_sum','is_trade':'buy_sum','cnt':'look_sum'})
+    d41['user_per_hour_trans_desier']=d41['feature_is_latest_time_buy_sum']/d41['buy_sum']
+    d41['user_per_hour_trans_rate']=d41['feature_is_latest_time_buy_sum']/d41['look_sum']
+        
+    d40=pd.merge(d40,d41,on=['user_id'],how='left')
+    d40=d40[['user_id','user_per_hour_trans_rate','user_per_hour_trans_desier']]    
+    d40=d40.drop_duplicates()
+    d40=d40.fillna(0)
+# 相乘法    
+    d41=pd.merge(d18,d40,on='user_id',how='left')
+    d41['label_user_per_hour_trans_rate']=d41['label_is_latest_time']*d41['user_per_hour_trans_rate']
+    d41=d41.fillna(0)
+#    d41=d41.drop('real_time',axis=1)
+#  现在是这个用户这天第几次  点击
+    d42=other[['user_id','real_time']]
+    d42=d42.drop_duplicates()
+    d42['label_user_ith_click']=0
+    
+    d43=d42.groupby('user_id')
+    d44=d43.size().reset_index()
+    d44=d44.rename(columns={0:'Size'})
+    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
+    d44=d44.reset_index(drop=True)
+    
+    for index,row in d44.iterrows():
+        d45=d43.get_group(d44.user_id[index])
+        d45=d45.reset_index()
+        d45=d45.rename(columns={'index':'Index'})
+        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
+        d45=d45.reset_index(drop=True)
+        d42.label_user_ith_click[d45.Index]=d45.index
+    d42.label_user_ith_click=d42.label_user_ith_click+1
+    cnt=other.iloc[:,0].size    
+    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
+    
+#用户 + 在这个时间点之前 有没有浏览过某商pin  
+    d50=other[['user_id','real_time','item_id']]
+    d51=d50.groupby(['user_id','item_id']).agg('min').reset_index()
+    d51=d51.rename(columns={'real_time':'real_time_min'})
+    
+    d50=pd.merge(d50,d51,on=['user_id','item_id'],how='left')
+    d50['label_item_id_has_ever']=(d50['real_time']>d50['real_time_min']).astype('int')
+    d50=d50[['user_id','item_id','label_item_id_has_ever','real_time']]
+    d50=d50.drop_duplicates() 
+#用户 + 在这个时间点之前 有没有浏览过某商dian   
+    d52=other[['user_id','real_time','shop_id']]
+    d53=d52.groupby(['user_id','shop_id']).agg('min').reset_index()
+    d53=d53.rename(columns={'real_time':'real_time_min'})
+    
+    d52=pd.merge(d52,d53,on=['user_id','shop_id'],how='left')
+    d52['label_shop_id_has_ever']=(d52['real_time']>d52['real_time_min']).astype('int')
+    d52=d52[['user_id','shop_id','label_shop_id_has_ever','real_time']]
+    d52=d52.drop_duplicates()    
+
+#  历史上是否 浏览过该shop
+    d54=feature[['user_id','shop_id']]
+    d54=d54.drop_duplicates()
+    d55=other[['user_id','shop_id']]
+    d55=d55.drop_duplicates()
+    d55=pd.merge(d55,d54,on=['shop_id','user_id'],how='inner')  
+    d55['label_shop_id_has_before']=1
+    d55=pd.merge(other[['user_id','shop_id']],d55,on=['user_id','shop_id'],how='left')
+    d55=d55.fillna(0)
+    d55=d55.drop_duplicates()
+##一天只有 单个小时 也算
+    d60=other[['user_id','real_hour','real_time']]
+    d60=d60.drop_duplicates()
+    d61=d60.groupby(['user_id','real_hour']).size().reset_index()
+    d61=d61.rename(columns={0:'cnt'})
+    d61=d61.drop_duplicates()
+    d60=pd.merge(d61,d60,on=['user_id','real_hour'],how='inner')
+    
+    d62=d60.groupby(['user_id','real_hour']).agg('max').reset_index()
+    d62=d62.rename(columns={'real_time':'real_time_max'})    
+    d60=pd.merge(d60,d62,on=['user_id','real_hour'],how='left')
+    d60['label_is_latest_time000']=(d60['real_time']==d60['real_time_max']).astype('int')
+    d60=d60[['user_id','real_time','label_is_latest_time000']]
+    d60=d60.drop_duplicates()    
+#    d42=d42.drop('real_time',axis=1)
+#  历史上 用户  不同点击顺序的购买率 
+#    d43=feature[['user_id','real_time']]
+#    d44=other[['user_id']]
+#    d43=d43[d43['user_id'].isin(d44['user_id'])]
+#    d43=d43.drop_duplicates()
+#    
+#    d43['label_his_user_ith_click']=0
+#    
+#    d44=d43.groupby('user_id')
+#    d45=d44.size().reset_index()
+#    d45=d45.rename(columns={0:'Size'})
+#    d45=d45.drop(d45[d45.Size==1].index)[['user_id']]
+#    d45=d45.reset_index(drop=True)
+#    
+#    for index,row in d45.iterrows():
+#        d46=d44.get_group(d45.user_id[index])
+#        d46=d46.reset_index()
+#        d46=d46.rename(columns={'index':'Index'})
+#        d46=d46.sort_index(axis=0,ascending=True,by='real_time')
+#        d46=d46.reset_index(drop=True)
+#        d43.label_his_user_ith_click[d46.Index]=d46.index
+#    d43.label_his_user_ith_click=d43.label_his_user_ith_click+1
+#    
+#    d44=feature[['user_id','real_time','is_trade']]
+#    d44=d44.drop_duplicates()
+#    d45=other[['user_id']]
+#    d44=d44[d44['user_id'].isin(d45['user_id'])]
+#    d44=pd.merge(d44,d43,on=['user_id','real_time'],how='left')
+#    
+#    d45=d44.groupby(['user_id','label_his_user_ith_click']).size().reset_index()
+
+# 相乘法    
     
     other=pd.merge(other,d,on='user_id',how='left')
     other=pd.merge(other,d1,on='user_id',how='left')
@@ -1348,7 +1762,7 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d16,on='shop_id',how='left')
     other=pd.merge(other,d17,on='shop_id',how='left')
 
-    other=pd.merge(other,d18,on=['user_id','real_time'],how='left')
+#    other=pd.merge(other,d18,on=['user_id','real_time'],how='left')
     other=pd.merge(other,d19,on=['user_id','item_brand_id','real_time'],how='left')
     other=pd.merge(other,d20,on=['user_id','item_city_id','real_time'],how='left')
     other=pd.merge(other,d21,on=['user_id','real_hour','item_price_level'],how='left')
@@ -1358,19 +1772,31 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d26,on=['user_id','item_id'],how='left')
     other=pd.merge(other,d28,on=['user_id','item_brand_id'],how='left')
     other=pd.merge(other,d29,on=['user_id','real_hour'],how='left')
-    other=pd.merge(other,d30,on=['user_id','real_hour'],how='left')
+#    other=pd.merge(other,d30,on=['user_id','real_hour'],how='left')
     other=pd.merge(other,d32,on=['user_id','item_city_id'],how='left')
     other=pd.merge(other,d33,on=['user_id','item_brand_id'],how='left')
     other=pd.merge(other,d34,on=['user_id','item_city_id'],how='left')
     other=pd.merge(other,d35,on='item_id',how='left')
     other=pd.merge(other,d36,on='item_id',how='left')
+    
+    other=pd.merge(other,d41,on=['user_id','real_time'],how='left')
+    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
 
+    other=pd.merge(other,d50,on=['user_id','item_id','real_time'],how='left')
+    other=pd.merge(other,d52,on=['user_id','shop_id','real_time'],how='left')
+    other=pd.merge(other,d55,on=['user_id','shop_id'],how='left')
+    other=pd.merge(other,d60,on=['user_id','real_time'],how='left')
+
+    
     other=other.drop(['perdict_category','context_id','perdict_property','predict_category_property','context_timestamp','real_time','real_day','real_hour','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
     return other
 #%%
 other1= extract_other_feature(feature1_2_3_4_5,dataset1)
 other2= extract_other_feature(feature2_3_4_5_6,dataset2)
 other3= extract_other_feature(feature3_4_5_6_7,dataset3)
+other1=pd.merge(other1,dataset1[['instance_id','real_hour']],on='instance_id',how='left')
+other2=pd.merge(other2,dataset2[['instance_id','real_hour']],on='instance_id',how='left')
+other3=pd.merge(other3,dataset3[['instance_id','real_hour']],on='instance_id',how='left')
 
 #%%
 """

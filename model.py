@@ -56,6 +56,10 @@ dataset2.drop(['instance_id'],axis=1,inplace=True)
 #
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
+dataset1=dataset1.drop('real_hour',axis=1)
+dataset2=dataset2.drop('real_hour',axis=1)
+dataset3=dataset3.drop('real_hour',axis=1)
+
 #%%
 watchlist = [(dataset1, label1)]#watchlist
 #watchlist = [(dataset2, label2)]#watchlist
@@ -74,7 +78,7 @@ model = xgb.XGBClassifier(
  	     tree_method='exact',
  	     seed=0,
           missing=-1,
-        n_estimators=1108 
+        n_estimators=1096 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
 model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
@@ -90,7 +94,7 @@ feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
 dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
-dataset3_pre.to_csv('20180418_0.08121_xgboost.txt',sep=" ",index=False)
+dataset3_pre.to_csv('20180418_0.08138_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb

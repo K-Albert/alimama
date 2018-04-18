@@ -27,7 +27,7 @@ dataset3=pd.read_csv('data/dataset3.csv')
 dataset2=pd.read_csv('data/dataset2.csv')
 dataset1=pd.read_csv('data/dataset1.csv')
 #%%
-dataset1=dataset1.sample(frac=0.333,random_state=0,replace=True)
+dataset1=dataset1.sample(frac=0.333,random_state=2018,replace=True)
 
 #dataset2_pos=dataset2[dataset2['is_trade']==1]
 #dataset2_neg=dataset2[dataset2['is_trade']==0]
@@ -56,9 +56,9 @@ dataset2.drop(['instance_id'],axis=1,inplace=True)
 #
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
-dataset1=dataset1.drop('real_hour',axis=1)
-dataset2=dataset2.drop('real_hour',axis=1)
-dataset3=dataset3.drop('real_hour',axis=1)
+dataset1=dataset1.drop(['hour_trans_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
+dataset2=dataset2.drop(['hour_trans_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
+dataset3=dataset3.drop(['hour_trans_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
 
 #%%
 watchlist = [(dataset1, label1)]#watchlist
@@ -77,11 +77,11 @@ model = xgb.XGBClassifier(
         learning_rate=0.01,
  	     tree_method='exact',
  	     seed=0,
-          missing=-1,
-        n_estimators=1096 
+          #missing=-1,
+        n_estimators=3000 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
+model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108 1096
 #model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
 """
 用dataset1训练 测试dataset2 0.0818
@@ -93,7 +93,11 @@ pyplot.show()
 feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
+test_b = pd.read_csv('data/round1_ijcai_18_test_b_20180418.txt',sep=" ")
+test_b=test_b[['instance']]
+#%%
 dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
+dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(test_b['instance_id'])].reset_index(drop=True)
 dataset3_pre.to_csv('20180418_0.08138_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%

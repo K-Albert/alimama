@@ -56,16 +56,73 @@ dataset2.drop(['instance_id'],axis=1,inplace=True)
 #
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
-dataset1=dataset1.drop(['hour_trans_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
-dataset2=dataset2.drop(['hour_trans_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
-dataset3=dataset3.drop(['hour_trans_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
+dataset1=dataset1.drop(['hour_trans_rate','hour_trans_dif_user_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
+dataset2=dataset2.drop(['hour_trans_rate','hour_trans_dif_user_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
+dataset3=dataset3.drop(['hour_trans_rate','hour_trans_dif_user_rate','hour_dif_user_age_level_trans_rate','hour_dif_user_star_level_trans_rate','hour_dif_user_occupation_trans_rate','hour_dif_user_gender_trans_rate'],axis=1)
+
+#%%
+dataset1=dataset1.drop(['label_user_ith_click_normalize','label_user_ith_click','label_user_per_hour_trans_rate','user_per_hour_trans_desier','user_per_hour_trans_rate'],axis=1)
+dataset2=dataset2.drop(['label_user_ith_click_normalize','label_user_ith_click','label_user_per_hour_trans_rate','user_per_hour_trans_desier','user_per_hour_trans_rate'],axis=1)
+dataset3=dataset3.drop(['label_user_ith_click_normalize','label_user_ith_click','label_user_per_hour_trans_rate','user_per_hour_trans_desier','user_per_hour_trans_rate'],axis=1)
+#%%
+dataset1=dataset1.drop(['label_is_latest_time000'],axis=1)
+dataset2=dataset2.drop(['label_is_latest_time000'],axis=1)
+dataset3=dataset3.drop(['label_is_latest_time000'],axis=1)
+#%%
+dataset1=dataset1.drop(['label_now_item_sales_level_bigger_x','label_now_item_sales_level_bigger_y','label_now_item_collected_level_bigger','shop_score_service_bigger'],axis=1)
+dataset2=dataset2.drop(['label_now_item_sales_level_bigger_x','label_now_item_sales_level_bigger_y','label_now_item_collected_level_bigger','shop_score_service_bigger'],axis=1)
+dataset3=dataset3.drop(['label_now_item_sales_level_bigger_x','label_now_item_sales_level_bigger_y','label_now_item_collected_level_bigger','shop_score_service_bigger'],axis=1)
+#%%
+dataset1=dataset1.drop(['item_pv_level'],axis=1)
+dataset2=dataset2.drop(['item_pv_level'],axis=1)
+dataset3=dataset3.drop(['item_pv_level'],axis=1)
+
+
+#%%
+"""
+user_buy_cnt
+user_buy_rate
+user_buy_dif_merchant_cnt
+user_buy_dif_merchant_brand_cnt
+user_buy_dif_merchant_city_cnt
+user_buy_dif_merchant_price_cnt
+user_buy_dif_merchant_sales_cnt
+user_buy_dif_merchant_collected_cnt
+user_buy_mean_merchant_sales_level_y
+user_buy_dif_shop_cnt
+user_buy_dif_shop_rate
+user_buy_dif_shop_review_num_level_cnt
+user_buy_dif_shop_star_level_cnt
+user_buy_mean_shop_score_description
+user_item_pv_level_buy_rate
+"""
+#%%
+dataset1=dataset1.drop(['user_buy_cnt','user_buy_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_mean_merchant_sales_level_y'],axis=1)
+dataset2=dataset2.drop(['user_buy_cnt','user_buy_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_mean_merchant_sales_level_y'],axis=1)
+dataset3=dataset3.drop(['user_buy_cnt','user_buy_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_mean_merchant_sales_level_y'],axis=1)
+
+dataset1=dataset1.drop(['user_buy_dif_shop_cnt','user_buy_dif_shop_rate','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_score_description','user_item_pv_level_buy_rate'],axis=1)
+dataset2=dataset2.drop(['user_buy_dif_shop_cnt','user_buy_dif_shop_rate','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_score_description','user_item_pv_level_buy_rate'],axis=1)
+dataset3=dataset3.drop(['user_buy_dif_shop_cnt','user_buy_dif_shop_rate','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_score_description','user_item_pv_level_buy_rate'],axis=1)
+#%%
+t=dataset1['real_hour']
+dataset1.drop('real_hour',axis=1,inplace=True)
+dataset1.insert(0,'real_hour',t)
+
+t=dataset2['real_hour']
+dataset2.drop('real_hour',axis=1,inplace=True)
+dataset2.insert(0,'real_hour',t)
+
+t=dataset3['real_hour']
+dataset3.drop('real_hour',axis=1,inplace=True)
+dataset3.insert(0,'real_hour',t)
 
 #%%
 watchlist = [(dataset1, label1)]#watchlist
 #watchlist = [(dataset2, label2)]#watchlist
 model = xgb.XGBClassifier(
         #objective='rank:pairwise',
-        objective='binary:logistic',
+         objective='binary:logistic',
  	     eval_metric='logloss',
  	     gamma=0.1,
  	     min_child_weight=1.1,
@@ -74,14 +131,14 @@ model = xgb.XGBClassifier(
  	     subsample=0.9,
  	     colsample_bytree=0.9,
  	     colsample_bylevel=0.9,
-        learning_rate=0.01,
+         learning_rate=0.01,
  	     tree_method='exact',
- 	     seed=0,
-          #missing=-1,
-        n_estimators=3000 
+ 	     seed=2018,
+         missing=-1,
+         n_estimators=3000 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108 1096
+model.fit(dataset2,label2,early_stopping_rounds=50,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108 1096
 #model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
 """
 用dataset1训练 测试dataset2 0.0818
@@ -92,6 +149,7 @@ pyplot.show()
 
 feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
+feature_importance2=feature_importance.reset_index()
 #%%
 test_b = pd.read_csv('data/round1_ijcai_18_test_b_20180418.txt',sep=" ")
 test_b=test_b[['instance']]
@@ -111,7 +169,7 @@ watchlist = [(dataset1, label11)]#watchlist
 gbm = lgb.LGBMRegressor(objective='binary',
                         is_unbalance=True,
                         num_leaves=100,
-                        learning_rate=0.01,
+                        learning_rate=0.05,
                         n_estimators=2000,
                         colsample_bytree = 0.9,
                         subsample = 0.9,

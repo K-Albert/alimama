@@ -1892,6 +1892,13 @@ def extract_hour_relate_feature(dataset,feature):
 #        return np.nan
 #    else:
 #        return min(gaps)
+1
+#    cnt=x.size
+#    for i in range(cnt-1):
+#        if i==0:
+#            x[i]=-1
+#        else:
+#            x[i]=x[i+1]-x[i]
 def extract_label_relate_feature(dataset,feature):
     label=dataset[['instance_id','real_hour','item_id','item_category_list','context_timestamp','user_id','item_price_level','item_sales_level','item_collected_level','shop_score_service']]
 #当前用户 浏览的 商品 价格等级 是否高于 用户曾购买的平均价格等级（需要处理nan）       
@@ -1977,8 +1984,30 @@ def extract_label_relate_feature(dataset,feature):
     d10['label_now_userclick_dot_rate']=d10['label_now_day_user_how_many_click']*d10['rate']
     d10=d10[['user_id','label_now_userclick_dot_rate','label_now_day_user_how_many_click']]
 #用户上一次点击距离这一次时间 
-#    d11=label[['user_id','context_timestamp']]
+    d11=label[['user_id','context_timestamp']]
+    d11=d11.drop_duplicates()
+    d11['label_last_click_time_gap']=-1
     
+    d12=d11.groupby('user_id')
+    d13=d12.size().reset_index()
+    d13=d13.rename(columns={0:'Size'})
+    d13=d13.drop(d13[d13.Size==1].index)[['user_id']]
+    d13=d13.reset_index(drop=True)   
+    
+    for index,row in d13.iterrows():
+        d14=d12.get_group(d13.user_id[index])
+        d14=d14.reset_index()
+        d14['gap']=-1
+        d14=d14.rename(columns={'index':'Index'})
+        d14=d14.sort_index(axis=0,ascending=True,by='context_timestamp')#升序
+        d14=d14.reset_index(drop=True)
+        for i in range(d14.iloc[:,0].size):
+            if i==0:
+                d14['gap'][i]=-1
+            else:
+                d14['gap'][i]=d14['context_timestamp'][i]-d14['context_timestamp'][i-1]                
+        d11.label_last_click_time_gap[d14.Index]=d14.gap
+    d11=d11[['user_id','context_timestamp','label_last_click_time_gap']]  
 # 历史上用户上一次购买距离这一次的时间    
     
 # 用户当前 浏览的商品 价格 是否  二级类目下 用户 浏览过/买过的平均价格等级   用sinstance_id
@@ -2008,10 +2037,11 @@ def extract_label_relate_feature(dataset,feature):
     label=pd.merge(label,d8,on='real_hour',how='left')
     label=pd.merge(label,d10,on='user_id',how='left')
     label=pd.merge(label,d13,on='instance_id',how='left')
-
+    label=pd.merge(label,d11,on=['user_id','context_timestamp'],how='left')
     #这个drop要注意改
     label=label.drop(['second_category','real_hour','item_id','item_category_list','context_timestamp','user_id','item_price_level','item_sales_level','item_collected_level','shop_score_service'],axis=1)
     return label  
+    
 #%%
 
 feature1_2_3=pd.concat([feature1,feature2,feature3]).reset_index(drop=True)
@@ -2169,11 +2199,11 @@ hour_related_feature4=extract_hour_relate_feature(dataset4,feature4_5_6)
 hour_related_feature5=extract_hour_relate_feature(dataset5,feature5_6_7) 
 
 #%%
-hour_related_feature1.to_csv('data/hour_related_feature1.csv')
-hour_related_feature2.to_csv('data/hour_related_feature2.csv')
-hour_related_feature3.to_csv('data/hour_related_feature3.csv')   
-hour_related_feature4.to_csv('data/hour_related_feature4.csv')     
-hour_related_feature5.to_csv('data/hour_related_feature5.csv')     
+hour_related_feature1.to_csv('data/hour_related_feature1.csv',index=None)
+hour_related_feature2.to_csv('data/hour_related_feature2.csv',index=None)
+hour_related_feature3.to_csv('data/hour_related_feature3.csv',index=None)   
+hour_related_feature4.to_csv('data/hour_related_feature4.csv',index=None)     
+hour_related_feature5.to_csv('data/hour_related_feature5.csv',index=None)     
   
 #%%
 label_relate_feature1=extract_label_relate_feature(dataset1,feature1_2_3)
@@ -2183,11 +2213,11 @@ label_relate_feature4=extract_label_relate_feature(dataset4,feature4_5_6)
 label_relate_feature5=extract_label_relate_feature(dataset5,feature5_6_7)
 
 #%%
-label_relate_feature1.to_csv('data/label_relate_feature1.csv')
-label_relate_feature2.to_csv('data/label_relate_feature2.csv')
-label_relate_feature3.to_csv('data/label_relate_feature3.csv') 
-label_relate_feature4.to_csv('data/label_relate_feature4.csv') 
-label_relate_feature5.to_csv('data/label_relate_feature5.csv') 
+label_relate_feature1.to_csv('data/label_relate_feature1.csv',index=None)
+label_relate_feature2.to_csv('data/label_relate_feature2.csv',index=None)
+label_relate_feature3.to_csv('data/label_relate_feature3.csv',index=None) 
+label_relate_feature4.to_csv('data/label_relate_feature4.csv',index=None) 
+label_relate_feature5.to_csv('data/label_relate_feature5.csv',index=None) 
 
 #%%
 #读取

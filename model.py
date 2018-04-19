@@ -123,21 +123,23 @@ feature_importance.index=dataset2.columns
 d=test_b[['instance_id']]
 dataset3_pre['predicted_score']=model_sub.predict_proba(dataset3)[:,1]
 dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
-dataset3_pre.to_csv('data/20180419_0.079454_xgboost.txt',sep=" ",index=False)
+dataset3_pre.to_csv('data/20180419_0.0794285_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb
 # 线下学习
+labelvv=np.array(label_val).squeeze()#1632 0.794285
 label22=np.array(label2).squeeze()
 label11=np.array(label1).squeeze()
-watchlist = [(dataset1, label11)]#watchlist
+watchlist = [(data_val, labelvv)]#watchlist
 #watchlist = [(dataset2, label22)]#watchlist
 
 gbm = lgb.LGBMRegressor(objective='binary',
-                        is_unbalance=True,
-                        num_leaves=100,
+                        #is_unbalance=True,
+                        min_child_samples=100,
+                        max_depth=3,
                         learning_rate=0.01,
-                        n_estimators=2000,
+                        n_estimators=3000,
                         colsample_bytree = 0.9,
                         subsample = 0.9,
                         seed=0
@@ -168,14 +170,34 @@ gbm = lgb.LGBMRegressor(objective='binary',
 #                        colsample_bytree = 0.7,
 #                        subsample = 0.7)
 #                        min_child_weight=1.1)
+gbm.fit(dataset1,label11,
+    eval_set=watchlist,
+    eval_metric=['binary_logloss'],
+    early_stopping_rounds= 100)
+#%%
+import lightgbm as lgb
+# 线下学习
+labelvv=np.array(label_val).squeeze()#1632 0.794285
+label22=np.array(label2).squeeze()
+label11=np.array(label1).squeeze()
+#watchlist = [(data_val, labelvv)]#watchlist
+watchlist = [(dataset2, label22)]#watchlist
+
+gbm = lgb.LGBMRegressor(objective='binary',
+                        #is_unbalance=True,
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=1632,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+#               
 gbm.fit(dataset2,label22,
     eval_set=watchlist,
     eval_metric=['binary_logloss'],
     early_stopping_rounds= 100)
-#gbm.fit(dataset1,label11,
-#    eval_set=watchlist,
-#    eval_metric=['binary_logloss'],
-#    early_stopping_rounds= 200)
 #%%
 from sklearn.metrics import log_loss
 print(log_loss(y_train,y_tt))
@@ -183,6 +205,9 @@ print(log_loss(y_train,y_tt))
 feature_importance=pd.Series(gbm.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
-dataset3_pre['predicted_score']=gbm.predict(dataset3,num_iteration=gbm.best_iteration_)
-dataset3_pre.to_csv('20180415_0.0826_gbm.txt',sep=" ",index=False)
+d=test_b[['instance_id']]
+dataset3_pre=test[['instance_id']]
+dataset3_pre['predicted_score']=gbm.predict(dataset3)
+dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
+dataset3_pre.to_csv('20180415_0.0794285_gbm.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)

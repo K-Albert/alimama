@@ -192,80 +192,6 @@ feature3_4_5_6_7=pd.concat([feature3,feature4,feature5,feature6,feature7],ignore
 用户活跃时间 
 
 """ 
-#def extract_user_day_feature(feature): 
-##label 中的用户 是在 一天中 最后一次 浏览时 购买 占所有购买的比率
-#    label =dataset[['user_id']]
-#    label=label.drop_duplicates()
-#    d1=feature[['user_id','real_time','is_trade']]
-#    d1=d1[d1.user_id.isin(label.user_id)]
-#    d2=d1.groupby('user_id').size().reset_index()
-#    d2=d2.rename(columns={0:'cnt'})
-#    d2=d2[d2['cnt']!=1]    
-#
-#    d1=d1[d1['user_id'].isin(d2['user_id'])]
-#    
-#    d2=d1.groupby('user_id').agg({'real_time':'max'}).reset_index()
-#    d2=d2.rename(columns={'real_time':'real_time_max'})
-#    
-#    d1=pd.merge(d1,d2,on=['user_id'],how='left')
-#    d1['feature_is_latest_time']=(d1['real_time']==d1['real_time_max']).astype('int')
-#    d1['label_is_latest_time_buy']=(d1['is_trade']&d1['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
-#    d2=d1.groupby('user_id').agg({'label_is_latest_time_buy':'sum','is_trade':'sum'}).reset_index()
-#    d2=d2[d2['is_trade']>0]
-#    d2=d2.rename(columns={'label_is_latest_time_buy':'label_is_latest_time_buy_sum','is_trade':'buy_sum'})
-#    d2['user_per_day_trans_rate']=d2['label_is_latest_time_buy_sum']/d2['buy_sum']
-#        
-#    d1=pd.merge(d1,d2,on='user_id',how='left')
-#    d1=d1[['user_id','label_is_latest_time_buy_sum','user_per_day_trans_rate']]    
-#    d1=d1.drop_duplicates()
-#    d1=d1.fillna(0)
-##用户 在一小时中  最后一次 购买转换率
-#    d3=feature[['user_id','real_time','real_hour','is_trade']]
-#    d3=d3[d3.user_id.isin(label.user_id)]
-#
-#    d4=d3.groupby('user_id').size().reset_index()
-#    d4=d4.rename(columns={0:'cnt'})
-#    d4=d4[d4['cnt']!=1]    
-#
-#    d3=d3[d3['user_id'].isin(d4['user_id'])]
-#    
-#    d4=d3.groupby(['user_id','real_hour']).agg({'real_time':'max'}).reset_index()
-#    d4=d4.rename(columns={'real_time':'real_time_max'})
-#    
-#    d3=pd.merge(d3,d4,on=['user_id','real_hour'],how='left')
-#    d3['feature_is_latest_time']=(d3['real_time']==d3['real_time_max']).astype('int')
-#    d3['feature_hour_is_latest_time_buy']=(d3['is_trade']&d3['feature_is_latest_time']).astype('int')#一天中的最后一次 并 购买
-#      
-#    d4=d3.groupby('user_id').agg({'feature_hour_is_latest_time_buy':'sum','is_trade':'sum'}).reset_index()
-#    d4=d4[d4['is_trade']>0]
-#    d4=d4.rename(columns={'feature_hour_is_latest_time_buy':'feature_is_latest_time_buy_sum','is_trade':'buy_sum'})
-#    d4['user_per_hour_trans_rate']=d4['feature_is_latest_time_buy_sum']/d4['buy_sum']
-#        
-#    d3=pd.merge(d3,d4,on=['user_id'],how='left')
-#    d3=d3[['user_id','feature_is_latest_time_buy_sum','user_per_hour_trans_rate']]    
-#    d3=d3.drop_duplicates()
-#    d3=d3.fillna(0)
-#    d=pd.merge(d1,d3,on='user_id',how='left')
-#    return d
-##%%
-#user_day_feature1= extract_user_day_feature(feature1).replace(np.nan,0) 
-#user_day_feature2= extract_user_day_feature(feature2).replace(np.nan,0)   
-#user_day_feature3= extract_user_day_feature(feature3).replace(np.nan,0)   
-#user_day_feature4= extract_user_day_feature(feature4).replace(np.nan,0)   
-#user_day_feature5= extract_user_day_feature(feature5).replace(np.nan,0)   
-#user_day_feature6= extract_user_day_feature(feature6).replace(np.nan,0)   
-#user_day_feature7= extract_user_day_feature(feature7).replace(np.nan,0) 
-# 
-#user_day_feature1_2_3_4_5=pd.concat([user_day_feature1,user_day_feature2,user_day_feature3,user_day_feature4,user_day_feature5])
-#user_day_feature1_2_3_4_5=user_day_feature1_2_3_4_5.groupby('user_id').agg('mean').reset_index()
-#
-#user_day_feature2_3_4_5_6=pd.concat([user_day_feature2,user_day_feature3,user_day_feature4,user_day_feature5,user_day_feature6])
-#user_day_feature2_3_4_5_6=user_day_feature2_3_4_5_6.groupby('user_id').agg('mean').reset_index()
-# 
-#user_day_feature3_4_5_6_7=pd.concat([user_day_feature3,user_day_feature4,user_day_feature5,user_day_feature6,user_day_feature7])
-#user_day_feature3_4_5_6_7=user_day_feature3_4_5_6_7.groupby('user_id').agg('mean').reset_index()
-
-#%%
 #用户在 一小时中的 第一次浏览时 购买 占所有购买的比率
 #feature=feature1
 def extract_user_feature(dataset,feature):
@@ -1608,26 +1534,26 @@ def extract_other_feature(feature,dataset):
     d41=d41.fillna(0)
 #    d41=d41.drop('real_time',axis=1)
 #  现在是这个用户这天第几次  点击
-    d42=other[['user_id','real_time']]
-    d42=d42.drop_duplicates()
-    d42['label_user_ith_click']=0
-    
-    d43=d42.groupby('user_id')
-    d44=d43.size().reset_index()
-    d44=d44.rename(columns={0:'Size'})
-    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
-    d44=d44.reset_index(drop=True)
-    
-    for index,row in d44.iterrows():
-        d45=d43.get_group(d44.user_id[index])
-        d45=d45.reset_index()
-        d45=d45.rename(columns={'index':'Index'})
-        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
-        d45=d45.reset_index(drop=True)
-        d42.label_user_ith_click[d45.Index]=d45.index
-    d42.label_user_ith_click=d42.label_user_ith_click+1
-    cnt=other.iloc[:,0].size    
-    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
+#    d42=other[['user_id','real_time']]
+#    d42=d42.drop_duplicates()
+#    d42['label_user_ith_click']=0
+#    
+#    d43=d42.groupby('user_id')
+#    d44=d43.size().reset_index()
+#    d44=d44.rename(columns={0:'Size'})
+#    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
+#    d44=d44.reset_index(drop=True)
+#    
+#    for index,row in d44.iterrows():
+#        d45=d43.get_group(d44.user_id[index])
+#        d45=d45.reset_index()
+#        d45=d45.rename(columns={'index':'Index'})
+#        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
+#        d45=d45.reset_index(drop=True)
+#        d42.label_user_ith_click[d45.Index]=d45.index
+#    d42.label_user_ith_click=d42.label_user_ith_click+1
+#    cnt=other.iloc[:,0].size    
+#    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
     
 #用户 + 在这个时间点之前 有没有浏览过某商pin  
     d50=other[['user_id','real_time','item_id']]
@@ -1743,7 +1669,7 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d36,on='item_id',how='left')
     
     other=pd.merge(other,d41,on=['user_id','real_time'],how='left')
-    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
+#    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
 
     other=pd.merge(other,d50,on=['user_id','item_id','real_time'],how='left')
     other=pd.merge(other,d52,on=['user_id','shop_id','real_time'],how='left')
@@ -2072,9 +1998,9 @@ def extract_label_relate_feature(dataset,feature):
     d13=d13[['instance_id','label_now_user_cat2_item_price_lower']]
     d13=d13.drop_duplicates()
          
-#    label['label_now_day_how_many_items']=d5
-#    label['label_now_day_how_many_users']=d6
-#    label['label_now_day_how_many_shop']=d7
+    label['label_now_day_how_many_items']=d5
+    label['label_now_day_how_many_users']=d6
+    label['label_now_day_how_many_shop']=d7
     label=pd.merge(label,d,on=['item_price_level','user_id'],how='left')
     label=pd.merge(label,d1,on=['item_sales_level','user_id'],how='left')
     label=pd.merge(label,d3,on=['item_collected_level','user_id'],how='left')
@@ -2088,102 +2014,157 @@ def extract_label_relate_feature(dataset,feature):
     return label  
 #%%
 
- 
+feature1_2_3=pd.concat([feature1,feature2,feature3]).reset_index(drop=True)
+feature2_3_4=pd.concat([feature2,feature3,feature4]).reset_index(drop=True)
+feature3_4_5=pd.concat([feature3,feature4,feature5]).reset_index(drop=True)
+feature4_5_6=pd.concat([feature4,feature5,feature6]).reset_index(drop=True)
+feature5_6_7=pd.concat([feature5,feature6,feature7]).reset_index(drop=True)
+
+dataset1=feature4
+dataset2=feature5
+dataset3=feature6
+dataset4=feature7
+dataset5=test
 #%%
-user1=  extract_user_feature(dataset1,feature1_2_3_4_5)  
-user2=  extract_user_feature(dataset2,feature2_3_4_5_6)    
-user3=  extract_user_feature(dataset3,feature3_4_5_6_7) 
+user1=  extract_user_feature(dataset1,feature1_2_3)  
+user2=  extract_user_feature(dataset2,feature2_3_4)    
+user3=  extract_user_feature(dataset3,feature3_4_5) 
+user4=  extract_user_feature(dataset4,feature4_5_6) 
+user5=  extract_user_feature(dataset5,feature5_6_7) 
 
 user1=user1.drop('user_id',axis=1) 
 user2=user2.drop('user_id',axis=1) 
 user3=user3.drop('user_id',axis=1) 
+user4=user4.drop('user_id',axis=1) 
+user5=user5.drop('user_id',axis=1) 
 
 #%%  
 user1.to_csv('data/user1.csv',index=None)
 user2.to_csv('data/user2.csv',index=None)
 user3.to_csv('data/user3.csv',index=None)
+user4.to_csv('data/user4.csv',index=None)
+user5.to_csv('data/user5.csv',index=None)
+
+
 #%%
-shop_feature1=extract_shop_feature(dataset1,feature1_2_3_4_5)
-shop_feature2=extract_shop_feature(dataset2,feature2_3_4_5_6)
-shop_feature3=extract_shop_feature(dataset3,feature3_4_5_6_7)
+shop_feature1=extract_shop_feature(dataset1,feature1_2_3)
+shop_feature2=extract_shop_feature(dataset2,feature2_3_4)
+shop_feature3=extract_shop_feature(dataset3,feature3_4_5)
+shop_feature4=extract_shop_feature(dataset4,feature4_5_6)
+shop_feature5=extract_shop_feature(dataset5,feature5_6_7)
+
 shop_feature1=shop_feature1.drop('shop_id',axis=1)
 shop_feature2=shop_feature2.drop('shop_id',axis=1)
 shop_feature3=shop_feature3.drop('shop_id',axis=1)
+shop_feature4=shop_feature4.drop('shop_id',axis=1)
+shop_feature5=shop_feature5.drop('shop_id',axis=1)
 
 #%%
 shop_feature1.to_csv('data/shop_feature1.csv',index=None)
 shop_feature2.to_csv('data/shop_feature2.csv',index=None)
 shop_feature3.to_csv('data/shop_feature3.csv',index=None)
 #%%
-merchant_feature1=extract_label_merchant_feature(dataset1,feature1_2_3_4_5)
-merchant_feature2=extract_label_merchant_feature(dataset2,feature2_3_4_5_6)
-merchant_feature3=extract_label_merchant_feature(dataset3,feature3_4_5_6_7)
+merchant_feature1=extract_label_merchant_feature(dataset1,feature1_2_3)
+merchant_feature2=extract_label_merchant_feature(dataset2,feature2_3_4)
+merchant_feature3=extract_label_merchant_feature(dataset3,feature3_4_5)
+merchant_feature4=extract_label_merchant_feature(dataset4,feature4_5_6)
+merchant_feature5=extract_label_merchant_feature(dataset5,feature5_6_7)
 
 merchant_feature1=merchant_feature1.drop('item_id',axis=1)
 merchant_feature2=merchant_feature2.drop('item_id',axis=1)
 merchant_feature3=merchant_feature3.drop('item_id',axis=1)
+merchant_feature4=merchant_feature4.drop('item_id',axis=1)
+merchant_feature5=merchant_feature5.drop('item_id',axis=1)
 
 #%%
 merchant_feature1.to_csv('data/merchant_feature1.csv',index=None)
 merchant_feature2.to_csv('data/merchant_feature2.csv',index=None)
 merchant_feature3.to_csv('data/merchant_feature3.csv',index=None)
 #%%
-other1= extract_other_feature(feature1_2_3_4_5,dataset1)
-other2= extract_other_feature(feature2_3_4_5_6,dataset2)
-other3= extract_other_feature(feature3_4_5_6_7,dataset3)
+other1= extract_other_feature(feature1_2_3,dataset1)
+other2= extract_other_feature(feature2_3_4,dataset2)
+other3= extract_other_feature(feature3_4_5,dataset3)
+other4= extract_other_feature(feature4_5_6,dataset4)
+other5= extract_other_feature(feature5_6_7,dataset5)
+
+
 other1=pd.merge(other1,dataset1[['instance_id','real_hour']],on='instance_id',how='left')
 other2=pd.merge(other2,dataset2[['instance_id','real_hour']],on='instance_id',how='left')
 other3=pd.merge(other3,dataset3[['instance_id','real_hour']],on='instance_id',how='left')
+other4=pd.merge(other4,dataset4[['instance_id','real_hour']],on='instance_id',how='left')
+other5=pd.merge(other5,dataset5[['instance_id','real_hour']],on='instance_id',how='left')
+
 #%%
 #注意这里  有问题  应该提取？？    一天还是N天  想提取N天的
-context_label1= extract_context_label_feature(feature1_2_3_4_5) 
-context_label2= extract_context_label_feature(feature2_3_4_5_6) 
-context_label3= extract_context_label_feature(feature3_4_5_6_7) 
+context_label1= extract_context_label_feature(feature1_2_3) 
+context_label2= extract_context_label_feature(feature2_3_4) 
+context_label3= extract_context_label_feature(feature3_4_5) 
+context_label4= extract_context_label_feature(feature4_5_6) 
+context_label5= extract_context_label_feature(feature5_6_7) 
 
-context_page1= extract_context_page_feature(feature1_2_3_4_5) 
-context_page2= extract_context_page_feature(feature2_3_4_5_6) 
-context_page3= extract_context_page_feature(feature3_4_5_6_7) 
+context_page1= extract_context_page_feature(feature1_2_3) 
+context_page2= extract_context_page_feature(feature2_3_4) 
+context_page3= extract_context_page_feature(feature3_4_5) 
+context_page4= extract_context_page_feature(feature4_5_6) 
+context_page5= extract_context_page_feature(feature5_6_7) 
 
 other1=pd.merge(other1,context_label1,on='label_predict_property_right_num',how='left')
 other2=pd.merge(other2,context_label2,on='label_predict_property_right_num',how='left')
 other3=pd.merge(other3,context_label3,on='label_predict_property_right_num',how='left')
+other4=pd.merge(other4,context_label4,on='label_predict_property_right_num',how='left')
+other5=pd.merge(other5,context_label5,on='label_predict_property_right_num',how='left')
 
 other1=pd.merge(other1,context_page1,on='context_page_id',how='left')
 other2=pd.merge(other2,context_page2,on='context_page_id',how='left')
 other3=pd.merge(other3,context_page3,on='context_page_id',how='left')
+other4=pd.merge(other4,context_page4,on='context_page_id',how='left')
+other5=pd.merge(other5,context_page5,on='context_page_id',how='left')
+
 #%% 
 other1.to_csv('data/other1.csv',index=None)
 other2.to_csv('data/other2.csv',index=None)
 other3.to_csv('data/other3.csv',index=None)
 #%%
-user_merchent1= extract_user_merchant_feature(dataset1,feature1_2_3_4_5)  
-user_merchent2= extract_user_merchant_feature(dataset2,feature2_3_4_5_6)  
-user_merchent3= extract_user_merchant_feature(dataset3,feature3_4_5_6_7)  
+user_merchent1= extract_user_merchant_feature(dataset1,feature1_2_3)  
+user_merchent2= extract_user_merchant_feature(dataset2,feature2_3_4)  
+user_merchent3= extract_user_merchant_feature(dataset3,feature3_4_5)  
+user_merchent4= extract_user_merchant_feature(dataset4,feature4_5_6)  
+user_merchent5= extract_user_merchant_feature(dataset5,feature5_6_7)  
+
 #%%
 user_merchent1.to_csv('data/user_merchant1.csv',index=None) 
 user_merchent2.to_csv('data/user_merchant2.csv',index=None)    
 user_merchent3.to_csv('data/user_merchant3.csv',index=None) 
 #%%    
-user_shop1= extract_user_shop_feature(dataset1,feature1_2_3_4_5)  
-user_shop2= extract_user_shop_feature(dataset2,feature2_3_4_5_6)  
-user_shop3= extract_user_shop_feature(dataset3,feature3_4_5_6_7)  
+user_shop1= extract_user_shop_feature(dataset1,feature1_2_3)  
+user_shop2= extract_user_shop_feature(dataset2,feature2_3_4)  
+user_shop3= extract_user_shop_feature(dataset3,feature3_4_5) 
+user_shop4= extract_user_shop_feature(dataset4,feature4_5_6)  
+user_shop5= extract_user_shop_feature(dataset5,feature5_6_7)  
+ 
 #%%
 user_shop1.to_csv('data/user_shop1.csv',index=None) 
 user_shop2.to_csv('data/user_shop2.csv',index=None)    
 user_shop3.to_csv('data/user_shop3.csv',index=None)       
 
 #%%
-hour_related_feature1=extract_hour_relate_feature(dataset1,feature1_2_3_4_5) 
-hour_related_feature2=extract_hour_relate_feature(dataset2,feature2_3_4_5_6) 
-hour_related_feature3=extract_hour_relate_feature(dataset3,feature3_4_5_6_7) 
+hour_related_feature1=extract_hour_relate_feature(dataset1,feature1_2_3) 
+hour_related_feature2=extract_hour_relate_feature(dataset2,feature2_3_4) 
+hour_related_feature3=extract_hour_relate_feature(dataset3,feature3_4_5) 
+hour_related_feature4=extract_hour_relate_feature(dataset4,feature4_5_6) 
+hour_related_feature5=extract_hour_relate_feature(dataset5,feature5_6_7) 
+
 #%%
 hour_related_feature1.to_csv('data/hour_related_feature1.csv')
 hour_related_feature2.to_csv('data/hour_related_feature2.csv')
 hour_related_feature3.to_csv('data/hour_related_feature3.csv')     
 #%%
-label_relate_feature1=extract_label_relate_feature(dataset1,feature1_2_3_4_5)
-label_relate_feature2=extract_label_relate_feature(dataset2,feature2_3_4_5_6)
-label_relate_feature3=extract_label_relate_feature(dataset3,feature3_4_5_6_7)
+label_relate_feature1=extract_label_relate_feature(dataset1,feature1_2_3)
+label_relate_feature2=extract_label_relate_feature(dataset2,feature2_3_4)
+label_relate_feature3=extract_label_relate_feature(dataset3,feature3_4_5)
+label_relate_feature4=extract_label_relate_feature(dataset4,feature4_5_6)
+label_relate_feature5=extract_label_relate_feature(dataset5,feature5_6_7)
+
 #%%
 label_relate_feature1.to_csv('data/label_relate_feature1.csv')
 label_relate_feature2.to_csv('data/label_relate_feature2.csv')
@@ -2226,22 +2207,32 @@ label_relate_feature3=pd.read_csv('data/label_relate_feature3.csv')
 merchant_feature1=merchant_feature1.drop_duplicates()
 merchant_feature2=merchant_feature2.drop_duplicates()
 merchant_feature3=merchant_feature3.drop_duplicates()
+merchant_feature4=merchant_feature4.drop_duplicates()
+merchant_feature5=merchant_feature5.drop_duplicates()
 
 shop_feature1=shop_feature1.drop_duplicates()
 shop_feature2=shop_feature2.drop_duplicates()
 shop_feature3=shop_feature3.drop_duplicates()
+shop_feature4=shop_feature4.drop_duplicates()
+shop_feature5=shop_feature5.drop_duplicates()
 
 user1=user1.drop_duplicates()
 user2=user2.drop_duplicates()
 user3=user3.drop_duplicates()
+user4=user4.drop_duplicates()
+user5=user5.drop_duplicates()
 
 user_shop1=user_shop1.drop_duplicates()
 user_shop2=user_shop2.drop_duplicates()
 user_shop3=user_shop3.drop_duplicates()
+user_shop4=user_shop4.drop_duplicates()
+user_shop5=user_shop5.drop_duplicates()
 
 user_merchent1=user_merchent1.drop_duplicates()
 user_merchent2=user_merchent2.drop_duplicates()
 user_merchent3=user_merchent3.drop_duplicates()
+user_merchent4=user_merchent4.drop_duplicates()
+user_merchent5=user_merchent5.drop_duplicates()
 
 #%%
 dataset1= pd.merge(other1,merchant_feature1,on='instance_id',how='left',copy=False)
@@ -2268,17 +2259,41 @@ dataset3= pd.merge(dataset3,user_shop3,on='instance_id',how='left')
 dataset3= pd.merge(dataset3,hour_related_feature3,on='instance_id',how='left',copy=False)
 dataset3= pd.merge(dataset3,label_relate_feature3,on='instance_id',how='left',copy=False)
 
+dataset4= pd.merge(other4,merchant_feature4,on='instance_id',how='left')
+dataset4= pd.merge(dataset4,shop_feature4,on='instance_id',how='left')
+dataset4= pd.merge(dataset4,user4,on='instance_id',how='left')
+dataset4= pd.merge(dataset4,user_merchent4,on='instance_id',how='left')
+dataset4= pd.merge(dataset4,user_shop4,on='instance_id',how='left')
+dataset4= pd.merge(dataset4,hour_related_feature4,on='instance_id',how='left',copy=False)
+dataset4= pd.merge(dataset4,label_relate_feature4,on='instance_id',how='left',copy=False)
+
+dataset5= pd.merge(other5,merchant_feature5,on='instance_id',how='left')
+dataset5= pd.merge(dataset5,shop_feature5,on='instance_id',how='left')
+dataset5= pd.merge(dataset5,user5,on='instance_id',how='left')
+dataset5= pd.merge(dataset5,user_merchent5,on='instance_id',how='left')
+dataset5= pd.merge(dataset5,user_shop5,on='instance_id',how='left')
+dataset5= pd.merge(dataset5,hour_related_feature5,on='instance_id',how='left',copy=False)
+dataset5= pd.merge(dataset5,label_relate_feature5,on='instance_id',how='left',copy=False)
+
 dataset1=dataset1.fillna(value=-1)
 dataset2=dataset2.fillna(value=-1)
 dataset3=dataset3.fillna(value=-1)
+dataset4=dataset4.fillna(value=-1)
+dataset5=dataset5.fillna(value=-1)
 
 dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
 dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)
 dataset3=dataset3.drop(['item_id','shop_id','user_id'],axis=1)
+dataset4=dataset4.drop(['item_id','shop_id','user_id'],axis=1)
+dataset5=dataset5.drop(['item_id','shop_id','user_id'],axis=1)
+
 #%%
 dataset1.to_csv('data/dataset1.csv',index=None)
 dataset2.to_csv('data/dataset2.csv',index=None)
 dataset3.to_csv('data/dataset3.csv',index=None)
+dataset4.to_csv('data/dataset4.csv',index=None)
+dataset5.to_csv('data/dataset4.csv',index=None)
+
 
 
 

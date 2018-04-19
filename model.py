@@ -20,17 +20,19 @@ from matplotlib import pyplot
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 #%%
-dataset3=pd.read_csv('data/dataset3_add.csv')
-dataset2=pd.read_csv('data/dataset2_add.csv')
-dataset1=pd.read_csv('data/dataset1_add.csv')
-#%%
+dataset5=pd.read_csv('data/dataset5.csv')
+dataset4=pd.read_csv('data/dataset4.csv')
 dataset3=pd.read_csv('data/dataset3.csv')
 dataset2=pd.read_csv('data/dataset2.csv')
 dataset1=pd.read_csv('data/dataset1.csv')
 #%%
-dataset1=dataset1.sample(frac=0.333,random_state=0,replace=True)
+dataset1=pd.concat([dataset1,dataset2,dataset3]).reset_index(drop=True)
+dataset2=pd.concat([dataset2,dataset3,dataset4]).reset_index(drop=True)
+dataset3=dataset5
 
-#dataset2_pos=dataset2[dataset2['is_trade']==1]
+#dataset1=dataset1.sample(frac=0.333,random_state=0,replace=True)
+
+#dataset2_pos=dataset2[dataset2['is_trade']==1]s
 #dataset2_neg=dataset2[dataset2['is_trade']==0]
 #
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
@@ -92,14 +94,13 @@ model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081
 #%%
 xgb.plot_importance(model)
 pyplot.show()
-
 feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
 d=test_b[['instance_id']]
 dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
 dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
-dataset3_pre.to_csv('20180418_0.08121_xgboost.txt',sep=" ",index=False)
+dataset3_pre.to_csv('data/20180419_0.0812_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb

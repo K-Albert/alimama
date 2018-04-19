@@ -18,6 +18,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import roc_auc_score
 from matplotlib import pyplot
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 #%%
 dataset3=pd.read_csv('data/dataset3_add.csv')
 dataset2=pd.read_csv('data/dataset2_add.csv')
@@ -39,11 +40,17 @@ label2=dataset2[['is_trade']]
 label1=dataset1[['is_trade']]
 dataset3_pre=dataset3[['instance_id']]
 
-dataset3.drop(['instance_id','second_category'],axis=1,inplace=True)
-dataset1.drop(['is_trade','second_category'],axis=1,inplace=True)
-dataset2.drop(['is_trade','second_category'],axis=1,inplace=True)
+dataset3.drop(['instance_id'],axis=1,inplace=True)
+dataset1.drop(['is_trade'],axis=1,inplace=True)
+dataset2.drop(['is_trade'],axis=1,inplace=True)
 dataset1.drop(['instance_id'],axis=1,inplace=True)
 dataset2.drop(['instance_id'],axis=1,inplace=True)
+
+le = LabelEncoder()
+dataset1['second_category']=le.fit_transform(dataset1['second_category'])
+dataset2['second_category']=le.fit_transform(dataset2['second_category'])
+dataset3['second_category']=le.fit_transform(dataset3['second_category'])
+
 #%%
 #dataset1_pos=dataset1[dataset1['is_trade']==1]
 #dataset1_neg=dataset1[dataset1['is_trade']==0]
@@ -74,7 +81,7 @@ model = xgb.XGBClassifier(
  	     tree_method='exact',
  	     seed=0,
           missing=-1,
-        n_estimators=1128 
+        n_estimators=2000 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
 model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108

@@ -1608,26 +1608,26 @@ def extract_other_feature(feature,dataset):
     d41=d41.fillna(0)
 #    d41=d41.drop('real_time',axis=1)
 #  现在是这个用户这天第几次  点击
-#    d42=other[['user_id','real_time']]
-#    d42=d42.drop_duplicates()
-#    d42['label_user_ith_click']=0
-#    
-#    d43=d42.groupby('user_id')
-#    d44=d43.size().reset_index()
-#    d44=d44.rename(columns={0:'Size'})
-#    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
-#    d44=d44.reset_index(drop=True)
-#    
-#    for index,row in d44.iterrows():
-#        d45=d43.get_group(d44.user_id[index])
-#        d45=d45.reset_index()
-#        d45=d45.rename(columns={'index':'Index'})
-#        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
-#        d45=d45.reset_index(drop=True)
-#        d42.label_user_ith_click[d45.Index]=d45.index
-#    d42.label_user_ith_click=d42.label_user_ith_click+1
-#    cnt=other.iloc[:,0].size    
-#    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
+    d42=other[['user_id','real_time']]
+    d42=d42.drop_duplicates()
+    d42['label_user_ith_click']=0
+    
+    d43=d42.groupby('user_id')
+    d44=d43.size().reset_index()
+    d44=d44.rename(columns={0:'Size'})
+    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
+    d44=d44.reset_index(drop=True)
+    
+    for index,row in d44.iterrows():
+        d45=d43.get_group(d44.user_id[index])
+        d45=d45.reset_index()
+        d45=d45.rename(columns={'index':'Index'})
+        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
+        d45=d45.reset_index(drop=True)
+        d42.label_user_ith_click[d45.Index]=d45.index
+    d42.label_user_ith_click=d42.label_user_ith_click+1
+    cnt=other.iloc[:,0].size    
+    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
     
 #用户 + 在这个时间点之前 有没有浏览过某商pin  
     d50=other[['user_id','real_time','item_id']]
@@ -1743,7 +1743,7 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d36,on='item_id',how='left')
     
     other=pd.merge(other,d41,on=['user_id','real_time'],how='left')
-#    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
+    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
 
     other=pd.merge(other,d50,on=['user_id','item_id','real_time'],how='left')
     other=pd.merge(other,d52,on=['user_id','shop_id','real_time'],how='left')
@@ -1940,10 +1940,38 @@ def extract_hour_relate_feature(dataset,feature):
 当前用户 浏览的 Item_sales_level 是否高于 用户曾购买的平均价格等级（不需处理nan）
 当前用户 浏览的 Item_collected_level是否 高于 用户曾购买的平均首层等级 （不处理缺失）
 当前用户 浏览的 shop_score_Service(不处理缺失)
+
+当天 一共有多少不同商品
+当天 一共有多少不同用户出现
+当天 一共有多少不同商店出现
+当天 该小时一共发生多少次点击
+当天 该用户一共发生多少次点击
+
+点击*用户的购买转化率
+
+用户上一次购买距离这一次的时间
+用户上一次点击距离这一次时间
+ 
+当前用户浏览的 商品价格等级 是否低于  当天用户浏览的平均价格等级
 """
+#def get_time_gap_before(s):
+#    date_received,dates = s.split('-')
+#    dates = dates.split(':')
+#    gaps = []
+#    for d in dates:
+#        this_gap = (date(int(date_received[0:4]),int(date_received[4:6]),int(date_received[6:8]))-date(int(d[0:4]),int(d[4:6]),int(d[6:8]))).days
+#        if this_gap>0:
+#            gaps.append(this_gap)
+#    if len(gaps)==0:
+#        return np.nan
+#    else:
+#        return min(gaps)
 def extract_label_relate_feature(dataset,feature):
-    label=dataset[['instance_id','user_id','item_price_level','item_sales_level','item_collected_level','shop_score_service']]
+    label=dataset[['instance_id','real_hour','item_id','item_category_list','context_timestamp','user_id','item_price_level','item_sales_level','item_collected_level','shop_score_service']]
 #当前用户 浏览的 商品 价格等级 是否高于 用户曾购买的平均价格等级（需要处理nan）       
+    feature['second_category']=feature['item_category_list'].apply(splitItemCategory_second)
+    label['second_category']=label['item_category_list'].apply(splitItemCategory_second)
+    
     d=feature[['user_id','item_price_level','is_trade']]
     d=d[d['is_trade']==1]
     d=d.drop('is_trade',axis=1)
@@ -1994,13 +2022,73 @@ def extract_label_relate_feature(dataset,feature):
     d2['shop_score_service_bigger']=(d2['shop_score_service']<=d2['shop_score_service_mean']).astype('int')
     d4=d2[['user_id','shop_score_service','shop_score_service_bigger']]   
     d4=d4.drop_duplicates()
-#  
+#当天一共有多少不同商品出现  这个特征用在训练集label 是不同天时
+    d5=label[['item_id']]
+    d5=d5.drop_duplicates()
+    d5=d5.iloc[:,0].size    
+#当天一共有多少用户活跃 这个特征用在训练集label 是不同天时
+    d6=label[['user_id']]
+    d6=d6.drop_duplicates()
+    d6=d6.iloc[:,0].size
+#当天 一共有多少 商店 这个特征用在训练集label 是不同天时
+    d7=label[['user_id']]
+    d7=d7.drop_duplicates()
+    d7=d7.iloc[:,0].size
+#当天 该小时一共发生多少次点击
+    d8=label[['real_hour']]
+    d8=d8.groupby('real_hour').size().reset_index()
+    d8=d8.rename(columns={0:'label_now_day_hour_how_many_click'})
+#当天 该用户 一共发生多少次点击
+    d9=label[['user_id']]
+    d9=d9.groupby('user_id').size().reset_index()
+    d9=d9.rename(columns={0:'label_now_day_user_how_many_click'})
+#  点击*历史上用户的购买转化率
+    d10=feature[['user_id','is_trade']]
+    d10['cnt']=1
+    d10=d10.groupby('user_id').agg('sum').reset_index()
+    d10['rate']=d10['is_trade']/d10['cnt']
+    d10=pd.merge(d9,d10,on='user_id',how='left')
+    d10['label_now_userclick_dot_rate']=d10['label_now_day_user_how_many_click']*d10['rate']
+    d10=d10[['user_id','label_now_userclick_dot_rate','label_now_day_user_how_many_click']]
+#用户上一次点击距离这一次时间 
+#    d11=label[['user_id','context_timestamp']]
+    
+# 历史上用户上一次购买距离这一次的时间    
+    
+# 用户当前 浏览的商品 价格 是否  二级类目下 用户 浏览过/买过的平均价格等级   用sinstance_id
+    d13=feature[['second_category','user_id','item_price_level','is_trade']]
+    d14=d13[d13['is_trade']==1]
+    d14=d14[['second_category','user_id','item_price_level']]
+    d14=d14.groupby(['second_category','user_id']).agg('mean').reset_index()
+    d14=d14.rename(columns={'item_price_level':'item_price_level_mean'})
+    
+    d15=label[['instance_id','second_category','user_id','item_price_level']]
+        
+    d13=pd.merge(d15,d14,on=['second_category','user_id'],how='left')
+    d13['label_now_user_cat2_item_price_lower']=(d13['item_price_level']<=d13['item_price_level_mean']).astype('int')
+    
+    d13=d13.fillna(-1)
+    d13['label_now_user_cat2_item_price_lower'][d13[d13['item_price_level_mean']==-1].index]=-1
+    d13=d13[['instance_id','label_now_user_cat2_item_price_lower']]
+    d13=d13.drop_duplicates()
+         
+#    label['label_now_day_how_many_items']=d5
+#    label['label_now_day_how_many_users']=d6
+#    label['label_now_day_how_many_shop']=d7
     label=pd.merge(label,d,on=['item_price_level','user_id'],how='left')
     label=pd.merge(label,d1,on=['item_sales_level','user_id'],how='left')
     label=pd.merge(label,d3,on=['item_collected_level','user_id'],how='left')
     label=pd.merge(label,d4,on=['shop_score_service','user_id'],how='left')
-    label=label.drop(['user_id','item_price_level','item_sales_level','item_collected_level','shop_score_service'],axis=1)
-    return label   
+    label=pd.merge(label,d8,on='real_hour',how='left')
+    label=pd.merge(label,d10,on='user_id',how='left')
+    label=pd.merge(label,d13,on='instance_id',how='left')
+
+    #这个drop要注意改
+    label=label.drop(['second_category','real_hour','item_id','item_category_list','context_timestamp','user_id','item_price_level','item_sales_level','item_collected_level','shop_score_service'],axis=1)
+    return label  
+#%%
+
+ 
 #%%
 user1=  extract_user_feature(dataset1,feature1_2_3_4_5)  
 user2=  extract_user_feature(dataset2,feature2_3_4_5_6)    

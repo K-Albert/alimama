@@ -486,15 +486,61 @@ sns.pointplot(x=d[d['user_gender_id']==0]['hour'], y=d[d['user_gender_id']==0]['
 sns.pointplot(x=d[d['user_gender_id']==1]['hour'], y=d[d['user_gender_id']==1]['rate'], normed=True, color="#C1F320", alpha=.5) 
 sns.pointplot(x=d[d['user_gender_id']==2]['hour'], y=d[d['user_gender_id']==2]['rate'], normed=True, color="#FFF0F5", alpha=.5) 
 sns.pointplot(x=d[d['user_gender_id']==-1]['hour'], y=d[d['user_gender_id']==-1]['rate'], normed=True, color="#FFFF00", alpha=.5) 
+#当前用户浏览的 商品价格等级 是否低于  当天用户浏览的平均价格等级  商店描述相符评分 shop_score_delivery很相似呀 shop_score_service
+
+d=feature7[['user_id','shop_star_level','is_trade']]
+d1=feature7[['user_id','shop_star_level']]
+d1=d1.groupby('user_id').agg('mean').reset_index()
+d1=d1.rename(columns={'shop_star_level':'item_price_level_mean'})
+d=pd.merge(d,d1,on='user_id',how='left')
+
+d['is_bigger']=(d['shop_star_level']<=d['item_price_level_mean']).astype('int')
+d=d.fillna(100)
+d['is_bigger'][d[d['shop_star_level']==100].index]=100             
+sns.barplot(x='is_bigger',y='is_trade',data=d)
+
+##
+d=feature7[['user_id','shop_star_level','item_price_level','shop_score_description','shop_score_delivery','shop_score_service','is_trade']]
+d1=feature7[['user_id','shop_star_level','item_price_level','shop_score_description','shop_score_delivery','shop_score_service']]
+d1=d1.groupby('user_id').agg('mean').reset_index()
+d1=d1.rename(columns={'shop_star_level':'shop_star_level_mean','item_price_level':'item_price_level_mean','shop_score_description':'shop_score_description_mean','shop_score_delivery':'shop_score_delivery_mean','shop_score_service':'shop_score_service_mean'})
+d=pd.merge(d,d1,on='user_id',how='left')
+
+d['is_bigger']=((d['shop_star_level']>d['shop_star_level_mean'])&(d['item_price_level']<d['item_price_level_mean'])&(d['shop_score_description']>d['shop_score_description_mean'])&(d['shop_score_delivery']>d['shop_score_delivery_mean'])&(d['shop_score_service']>d['shop_score_service_mean'])).astype('int')          
+d=d.fillna(100)
+d['is_bigger'][d[d['shop_star_level']==100].index]=100             
+sns.barplot(x='is_bigger',y='is_trade',data=d)
+## 用户 当前 二类 下的item的 价格等级 是否 低于 历史上层购买的 需要处理缺失值  可能很有用
+d=feature1_2_3_4_5[['item_category_list','user_id','item_price_level','is_trade']]
+d['second_category'] = d['item_category_list'].apply(splitItemCategory_second)
+d1=d[d['is_trade']==1]
+d1=d1[['second_category','user_id','item_price_level']]
+d1=d1.groupby(['second_category','user_id']).agg('mean').reset_index()
+d1=d1.rename(columns={'item_price_level':'item_price_level_mean'})
+
+d2=dataset1[['item_category_list','user_id','item_price_level','is_trade']]
+d2['second_category'] = d2['item_category_list'].apply(splitItemCategory_second)
 
 
+d=pd.merge(d2,d1,on=['second_category','user_id'],how='left')
+d['bigger']=(d['item_price_level']<=d['item_price_level_mean']).astype('int')
 
+d=d.fillna(100)
+d['bigger'][d[d['item_price_level_mean']==100].index]=100
 
+sns.barplot(x='bigger',y='is_trade',data=d)
+#  用户当前 二类 下的 价格等级 是否低于 今日浏览的  感觉有一定参考价值，但是不大
+d=dataset1[['item_category_list','user_id','item_price_level','is_trade']]
+d['second_category'] = d['item_category_list'].apply(splitItemCategory_second)
+d1=d[['second_category','user_id','item_price_level']]
+d1=d1.groupby(['second_category','user_id']).agg('mean').reset_index()
+d1=d1.rename(columns={'item_price_level':'item_price_level_mean'})
 
+d=pd.merge(d,d1,on=['second_category','user_id'],how='left')
+d['bigger']=(d['item_price_level']<=d['item_price_level_mean']).astype('int')
 
+d=d.fillna(100)
+d['bigger'][d[d['item_price_level_mean']==100].index]=100
 
-
-
-
-
+sns.barplot(x='bigger',y='is_trade',data=d)
 

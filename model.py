@@ -89,7 +89,9 @@ pyplot.show()
 feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
+d=test_b[['instance_id']]
 dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
+dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
 dataset3_pre.to_csv('20180418_0.08121_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%

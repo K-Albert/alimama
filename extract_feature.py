@@ -1534,26 +1534,26 @@ def extract_other_feature(feature,dataset):
     d41=d41.fillna(0)
 #    d41=d41.drop('real_time',axis=1)
 #  现在是这个用户这天第几次  点击
-#    d42=other[['user_id','real_time']]
-#    d42=d42.drop_duplicates()
-#    d42['label_user_ith_click']=0
-#    
-#    d43=d42.groupby('user_id')
-#    d44=d43.size().reset_index()
-#    d44=d44.rename(columns={0:'Size'})
-#    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
-#    d44=d44.reset_index(drop=True)
-#    
-#    for index,row in d44.iterrows():
-#        d45=d43.get_group(d44.user_id[index])
-#        d45=d45.reset_index()
-#        d45=d45.rename(columns={'index':'Index'})
-#        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
-#        d45=d45.reset_index(drop=True)
-#        d42.label_user_ith_click[d45.Index]=d45.index
-#    d42.label_user_ith_click=d42.label_user_ith_click+1
-#    cnt=other.iloc[:,0].size    
-#    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
+    d42=other[['user_id','real_time']]
+    d42=d42.drop_duplicates()
+    d42['label_user_ith_click']=0
+    
+    d43=d42.groupby('user_id')
+    d44=d43.size().reset_index()
+    d44=d44.rename(columns={0:'Size'})
+    d44=d44.drop(d44[d44.Size==1].index)[['user_id']]
+    d44=d44.reset_index(drop=True)
+    
+    for index,row in d44.iterrows():
+        d45=d43.get_group(d44.user_id[index])
+        d45=d45.reset_index()
+        d45=d45.rename(columns={'index':'Index'})
+        d45=d45.sort_index(axis=0,ascending=True,by='real_time')
+        d45=d45.reset_index(drop=True)
+        d42.label_user_ith_click[d45.Index]=d45.index
+    d42.label_user_ith_click=d42.label_user_ith_click+1
+    cnt=other.iloc[:,0].size    
+    d42['label_user_ith_click_normalize']= d42.label_user_ith_click/cnt
     
 #用户 + 在这个时间点之前 有没有浏览过某商pin  
     d50=other[['user_id','real_time','item_id']]
@@ -1669,7 +1669,7 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d36,on='item_id',how='left')
     
     other=pd.merge(other,d41,on=['user_id','real_time'],how='left')
-#    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
+    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
 
     other=pd.merge(other,d50,on=['user_id','item_id','real_time'],how='left')
     other=pd.merge(other,d52,on=['user_id','shop_id','real_time'],how='left')
@@ -2194,34 +2194,51 @@ label_relate_feature5.to_csv('data/label_relate_feature5.csv')
 other1=pd.read_csv('data/other1.csv')
 other2=pd.read_csv('data/other2.csv')
 other3=pd.read_csv('data/other3.csv')
+other4=pd.read_csv('data/other4.csv')
+other5=pd.read_csv('data/other5.csv')
 
 merchant_feature1=pd.read_csv('data/merchant_feature1.csv')
 merchant_feature2=pd.read_csv('data/merchant_feature2.csv')
 merchant_feature3=pd.read_csv('data/merchant_feature3.csv')
+merchant_feature4=pd.read_csv('data/merchant_feature4.csv')
+merchant_feature5=pd.read_csv('data/merchant_feature5.csv')
 
 shop_feature1=pd.read_csv('data/shop_feature1.csv')
 shop_feature2=pd.read_csv('data/shop_feature2.csv')
 shop_feature3=pd.read_csv('data/shop_feature3.csv')
+shop_feature4=pd.read_csv('data/shop_feature4.csv')
+shop_feature5=pd.read_csv('data/shop_feature5.csv')
 
 user1=pd.read_csv('data/user1.csv')
 user2=pd.read_csv('data/user2.csv')
 user3=pd.read_csv('data/user3.csv') 
+user4=pd.read_csv('data/user4.csv') 
+user5=pd.read_csv('data/user5.csv') 
 
 user_merchent1=pd.read_csv('data/user_merchant1.csv')   
 user_merchent2=pd.read_csv('data/user_merchant2.csv')   
 user_merchent3=pd.read_csv('data/user_merchant3.csv')   
+user_merchent4=pd.read_csv('data/user_merchant4.csv')   
+user_merchent5=pd.read_csv('data/user_merchant5.csv')   
 
 user_shop1=pd.read_csv('data/user_shop1.csv')   
 user_shop2=pd.read_csv('data/user_shop2.csv')   
 user_shop3=pd.read_csv('data/user_shop3.csv') 
+user_shop4=pd.read_csv('data/user_shop4.csv') 
+user_shop5=pd.read_csv('data/user_shop5.csv') 
 
 hour_related_feature1=pd.read_csv('data/hour_related_feature1.csv')
 hour_related_feature2=pd.read_csv('data/hour_related_feature2.csv')
 hour_related_feature3=pd.read_csv('data/hour_related_feature3.csv')
+hour_related_feature4=pd.read_csv('data/hour_related_feature4.csv')
+hour_related_feature5=pd.read_csv('data/hour_related_feature5.csv')
 
 label_relate_feature1=pd.read_csv('data/label_relate_feature1.csv')
 label_relate_feature2=pd.read_csv('data/label_relate_feature2.csv')
 label_relate_feature3=pd.read_csv('data/label_relate_feature3.csv')
+label_relate_feature4=pd.read_csv('data/label_relate_feature4.csv')
+label_relate_feature5=pd.read_csv('data/label_relate_feature5.csv')
+
 #%%
 
 merchant_feature1=merchant_feature1.drop_duplicates()

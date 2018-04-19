@@ -27,6 +27,7 @@ dataset2=pd.read_csv('data/dataset2.csv')
 dataset1=pd.read_csv('data/dataset1.csv')
 #%%
 dataset1=pd.concat([dataset1,dataset2,dataset3]).reset_index(drop=True)
+data_val=dataset4
 dataset2=pd.concat([dataset2,dataset3,dataset4]).reset_index(drop=True)
 dataset3=dataset5
 
@@ -38,20 +39,24 @@ dataset3=dataset5
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
 #%%
-label2=dataset2[['is_trade']]
 label1=dataset1[['is_trade']]
+label2=dataset2[['is_trade']]
+label_val = data_val[['is_trade']]
 dataset3_pre=dataset3[['instance_id']]
 
 dataset3.drop(['instance_id'],axis=1,inplace=True)
 dataset1.drop(['is_trade'],axis=1,inplace=True)
 dataset2.drop(['is_trade'],axis=1,inplace=True)
+data_val.drop(['is_trade'],axis=1,inplace=True)
 dataset1.drop(['instance_id'],axis=1,inplace=True)
 dataset2.drop(['instance_id'],axis=1,inplace=True)
+data_val.drop(['instance_id'],axis=1,inplace=True)
 
 le = LabelEncoder()
 dataset1['second_category']=le.fit_transform(dataset1['second_category'])
 dataset2['second_category']=le.fit_transform(dataset2['second_category'])
 dataset3['second_category']=le.fit_transform(dataset3['second_category'])
+data_val['second_category']=le.fit_transform(data_val['second_category'])
 
 #%%
 #dataset1_pos=dataset1[dataset1['is_trade']==1]
@@ -66,7 +71,7 @@ dataset3['second_category']=le.fit_transform(dataset3['second_category'])
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
 #%%
-watchlist = [(dataset2, label2)]#watchlist
+watchlist = [(data_val, label_val)]#watchlist
 #watchlist = [(dataset2, label2)]#watchlist
 model = xgb.XGBClassifier(
         #objective='rank:pairwise',
@@ -83,14 +88,32 @@ model = xgb.XGBClassifier(
  	     tree_method='exact',
  	     seed=0,
           missing=-1,
-        n_estimators=3500 
+        n_estimators=5000 
         )
-#model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
-#model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
-"""
-用dataset1训练 测试dataset2 0.0818
-"""
+model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)#0.79454
+#%%
+#提交
+watchlist = [(dataset2, label2)]#watchlist
+
+model_sub = xgb.XGBClassifier(
+        #objective='rank:pairwise',
+        objective='binary:logistic',
+ 	     eval_metric='logloss',
+ 	     gamma=0.1,
+ 	     min_child_weight=1.1,
+ 	     max_depth=3,
+ 	     reg_lambda=10,
+ 	     subsample=0.9,
+ 	     colsample_bytree=0.9,
+ 	     colsample_bylevel=0.9,
+        learning_rate=0.01,
+ 	     tree_method='exact',
+ 	     seed=0,
+          missing=-1,
+        n_estimators=1812 
+        )
+model_sub.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#1450 1604 1733 1814
+
 #%%
 xgb.plot_importance(model)
 pyplot.show()
@@ -98,9 +121,9 @@ feature_importance=pd.Series(model.feature_importances_)
 feature_importance.index=dataset2.columns
 #%%
 d=test_b[['instance_id']]
-dataset3_pre['predicted_score']=model.predict_proba(dataset3)[:,1]
+dataset3_pre['predicted_score']=model_sub.predict_proba(dataset3)[:,1]
 dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
-dataset3_pre.to_csv('data/20180419_0.0812_xgboost.txt',sep=" ",index=False)
+dataset3_pre.to_csv('data/20180419_0.079454_xgboost.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb

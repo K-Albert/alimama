@@ -74,7 +74,7 @@ model = xgb.XGBClassifier(
  	     tree_method='exact',
  	     seed=0,
           missing=-1,
-        n_estimators=1108 
+        n_estimators=1128 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
 model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108

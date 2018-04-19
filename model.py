@@ -66,7 +66,7 @@ dataset3['second_category']=le.fit_transform(dataset3['second_category'])
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
 #%%
-watchlist = [(dataset1, label1)]#watchlist
+watchlist = [(dataset2, label2)]#watchlist
 #watchlist = [(dataset2, label2)]#watchlist
 model = xgb.XGBClassifier(
         #objective='rank:pairwise',
@@ -83,10 +83,10 @@ model = xgb.XGBClassifier(
  	     tree_method='exact',
  	     seed=0,
           missing=-1,
-        n_estimators=2000 
+        n_estimators=3500 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
+model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
 #model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
 """
 用dataset1训练 测试dataset2 0.0818

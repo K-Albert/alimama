@@ -2063,6 +2063,9 @@ shop_feature5=shop_feature5.drop('shop_id',axis=1)
 shop_feature1.to_csv('data/shop_feature1.csv',index=None)
 shop_feature2.to_csv('data/shop_feature2.csv',index=None)
 shop_feature3.to_csv('data/shop_feature3.csv',index=None)
+shop_feature4.to_csv('data/shop_feature4.csv',index=None)
+shop_feature5.to_csv('data/shop_feature5.csv',index=None)
+
 #%%
 merchant_feature1=extract_label_merchant_feature(dataset1,feature1_2_3)
 merchant_feature2=extract_label_merchant_feature(dataset2,feature2_3_4)
@@ -2080,6 +2083,8 @@ merchant_feature5=merchant_feature5.drop('item_id',axis=1)
 merchant_feature1.to_csv('data/merchant_feature1.csv',index=None)
 merchant_feature2.to_csv('data/merchant_feature2.csv',index=None)
 merchant_feature3.to_csv('data/merchant_feature3.csv',index=None)
+merchant_feature4.to_csv('data/merchant_feature4.csv',index=None)
+merchant_feature5.to_csv('data/merchant_feature5.csv',index=None)
 #%%
 other1= extract_other_feature(feature1_2_3,dataset1)
 other2= extract_other_feature(feature2_3_4,dataset2)
@@ -2124,6 +2129,9 @@ other5=pd.merge(other5,context_page5,on='context_page_id',how='left')
 other1.to_csv('data/other1.csv',index=None)
 other2.to_csv('data/other2.csv',index=None)
 other3.to_csv('data/other3.csv',index=None)
+other4.to_csv('data/other4.csv',index=None)
+other5.to_csv('data/other5.csv',index=None)
+
 #%%
 user_merchent1= extract_user_merchant_feature(dataset1,feature1_2_3)  
 user_merchent2= extract_user_merchant_feature(dataset2,feature2_3_4)  
@@ -2135,6 +2143,9 @@ user_merchent5= extract_user_merchant_feature(dataset5,feature5_6_7)
 user_merchent1.to_csv('data/user_merchant1.csv',index=None) 
 user_merchent2.to_csv('data/user_merchant2.csv',index=None)    
 user_merchent3.to_csv('data/user_merchant3.csv',index=None) 
+user_merchent4.to_csv('data/user_merchant4.csv',index=None) 
+user_merchent5.to_csv('data/user_merchant5.csv',index=None) 
+
 #%%    
 user_shop1= extract_user_shop_feature(dataset1,feature1_2_3)  
 user_shop2= extract_user_shop_feature(dataset2,feature2_3_4)  
@@ -2145,7 +2156,10 @@ user_shop5= extract_user_shop_feature(dataset5,feature5_6_7)
 #%%
 user_shop1.to_csv('data/user_shop1.csv',index=None) 
 user_shop2.to_csv('data/user_shop2.csv',index=None)    
-user_shop3.to_csv('data/user_shop3.csv',index=None)       
+user_shop3.to_csv('data/user_shop3.csv',index=None)
+user_shop4.to_csv('data/user_shop4.csv',index=None)       
+user_shop5.to_csv('data/user_shop5.csv',index=None)       
+       
 
 #%%
 hour_related_feature1=extract_hour_relate_feature(dataset1,feature1_2_3) 
@@ -2157,7 +2171,10 @@ hour_related_feature5=extract_hour_relate_feature(dataset5,feature5_6_7)
 #%%
 hour_related_feature1.to_csv('data/hour_related_feature1.csv')
 hour_related_feature2.to_csv('data/hour_related_feature2.csv')
-hour_related_feature3.to_csv('data/hour_related_feature3.csv')     
+hour_related_feature3.to_csv('data/hour_related_feature3.csv')   
+hour_related_feature4.to_csv('data/hour_related_feature4.csv')     
+hour_related_feature5.to_csv('data/hour_related_feature5.csv')     
+  
 #%%
 label_relate_feature1=extract_label_relate_feature(dataset1,feature1_2_3)
 label_relate_feature2=extract_label_relate_feature(dataset2,feature2_3_4)
@@ -2169,6 +2186,9 @@ label_relate_feature5=extract_label_relate_feature(dataset5,feature5_6_7)
 label_relate_feature1.to_csv('data/label_relate_feature1.csv')
 label_relate_feature2.to_csv('data/label_relate_feature2.csv')
 label_relate_feature3.to_csv('data/label_relate_feature3.csv') 
+label_relate_feature4.to_csv('data/label_relate_feature4.csv') 
+label_relate_feature5.to_csv('data/label_relate_feature5.csv') 
+
 #%%
 #读取
 other1=pd.read_csv('data/other1.csv')
@@ -2292,7 +2312,7 @@ dataset1.to_csv('data/dataset1.csv',index=None)
 dataset2.to_csv('data/dataset2.csv',index=None)
 dataset3.to_csv('data/dataset3.csv',index=None)
 dataset4.to_csv('data/dataset4.csv',index=None)
-dataset5.to_csv('data/dataset4.csv',index=None)
+dataset5.to_csv('data/dataset5.csv',index=None)
 
 
 

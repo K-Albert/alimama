@@ -374,11 +374,12 @@ modelrf=RandomForestClassifier(oob_score=True,
                                max_depth=20,
                                max_features='auto',
                                verbose=2)
-modelrf.fit(dataset2_dispose,label2)
+modelrf.fit(dataset1,label1)
 #%%
-y_rf1 =modelrf.predict_proba(dataset1_dispose)[:,1]
+y_rf1 =modelrf.predict_proba(data_val)[:,1]
 y_rf3=modelrf.predict_proba(dataset3_dispose)[:,1]
-metrics.roc_auc_score(label1, y_rf1)
+print(log_loss(label_val,y_rf1))
+metrics.roc_auc_score(label_vv, y_rf1)
 #%%
 y_rf1=y_rf1.reshape(-1, 1)
 y_rf3=y_rf3.reshape(-1, 1)

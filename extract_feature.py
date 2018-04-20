@@ -2347,7 +2347,29 @@ dataset2=dataset2.fillna(value=-1)
 dataset3=dataset3.fillna(value=-1)
 dataset4=dataset4.fillna(value=-1)
 dataset5=dataset5.fillna(value=-1)
+#%%
 
+le = LabelEncoder()
+dataset1['item_id']=le.fit_transform(dataset1['item_id'])
+dataset1['shop_id']=le.fit_transform(dataset1['shop_id'])
+dataset1['user_id']=le.fit_transform(dataset1['user_id'])
+
+dataset2['item_id']=le.fit_transform(dataset2['item_id'])
+dataset2['shop_id']=le.fit_transform(dataset2['shop_id'])
+dataset2['user_id']=le.fit_transform(dataset2['user_id'])
+
+dataset3['item_id']=le.fit_transform(dataset3['item_id'])
+dataset3['shop_id']=le.fit_transform(dataset3['shop_id'])
+dataset3['user_id']=le.fit_transform(dataset3['user_id'])
+
+dataset4['item_id']=le.fit_transform(dataset4['item_id'])
+dataset4['shop_id']=le.fit_transform(dataset4['shop_id'])
+dataset4['user_id']=le.fit_transform(dataset4['user_id'])
+
+dataset5['item_id']=le.fit_transform(dataset5['item_id'])
+dataset5['shop_id']=le.fit_transform(dataset5['shop_id'])
+dataset5['user_id']=le.fit_transform(dataset5['user_id'])
+#%%
 dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
 dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)
 dataset3=dataset3.drop(['item_id','shop_id','user_id'],axis=1)

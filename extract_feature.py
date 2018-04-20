@@ -19,6 +19,164 @@ train = train.reset_index(drop=True)
 test_a = pd.read_csv('data/round1_ijcai_18_test_a_20180301.txt',sep=" ")
 test_b = pd.read_csv('data/round1_ijcai_18_test_b_20180418.txt',sep=" ")
 test=pd.concat([test_a,test_b]).reset_index(drop=True)
+
+le = LabelEncoder()
+#test['user_id_del']=le.fit_transform(test['user_id'])
+#test['shop_id_del']=le.fit_transform(test['shop_id'])
+#test['user_id_del']=le.fit_transform(test['user_id'])
+train['user_id_del']=le.fit_transform(train['user_id'])
+train['shop_id_del']=le.fit_transform(train['shop_id'])
+train['item_id_del']=le.fit_transform(train['item_id'])
+train['item_brand_id_del']=le.fit_transform(train['item_brand_id'])
+train['item_city_id_del']=le.fit_transform(train['item_city_id'])
+
+def user_id_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.05:
+        return 1
+    elif 0.05< x <=0.1:
+        return 2
+    elif   0.1<x<=0.15:
+        return 3
+    elif     0.15<x<0.2:
+        return 4
+    elif 0.2<x<0.25:
+        return 5
+    elif  0.25<x<0.3:
+        return 6
+    elif 0.3<=x<=0.35:
+        return 7
+    elif   0.35<x<=0.5:
+        return 8
+    elif    0.5<x<1:
+        return 9
+    else:
+        return 10 
+d=train[['user_id_del','is_trade']]
+d['cnt']=1
+d=d.groupby('user_id_del').agg('sum').reset_index()
+d['user_id_after']=d['is_trade']/d['cnt']
+d['user_id_after']=d['user_id_after'].apply(user_id_map)
+d=d[['user_id_after','user_id_del']]
+train=pd.merge(train,d,on='user_id_del',how='left')
+train=train.drop('user_id_del',axis=1)
+def shop_id_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.02:
+        return 2
+    elif 0.02<x<=0.03:
+        return 3
+    elif 0.03<x<=0.04:
+        return 4
+    elif 0.04<x<=0.05:
+        return 5
+    elif 0.05<x<=0.1:
+        return 6
+    elif 0.1<x<1:
+        return 7
+    else:
+        return 8 
+d=train[['shop_id_del','is_trade']]
+d['cnt']=1
+d=d.groupby('shop_id_del').agg('sum').reset_index()
+d['shop_id_after']=d['is_trade']/d['cnt']
+
+d['shop_id_after']=d['shop_id_after'].apply(shop_id_map)
+d=d[['shop_id_after','shop_id_del']]
+train=pd.merge(train,d,on='shop_id_del',how='left')
+train=train.drop('shop_id_del',axis=1)
+def item_id_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.02:
+        return 2
+    elif  0.02<x<=0.03:
+        return 3
+    elif  0.03<x<=0.05:
+        return 4
+    elif 0.05<x<=0.08:
+        return 5
+    elif 0.08<x<=0.15:
+        return 6
+    elif 0.15<x<=0.2:
+        return 7
+    elif  0.2<x<=0.5:
+        return 8
+    else:
+        return 9 
+d=train[['item_id_del','is_trade']]
+d['cnt']=1
+d=d.groupby('item_id_del').agg('sum').reset_index()
+d['item_id_after']=d['is_trade']/d['cnt']
+d['item_id_after']=d['item_id_after'].apply(item_id_map)
+d=d[['item_id_after','item_id_del']]
+train=pd.merge(train,d,on='item_id_del',how='left')
+train=train.drop('item_id_del',axis=1)
+def item_brand_id_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.015:
+        return 2
+    elif  0.015<x<=0.02:
+        return 3
+    elif  0.02<x<=0.03:
+        return 4
+    elif 0.03<x<=0.04:
+        return 5
+    elif 0.04<x<=0.05:
+        return 6
+    elif 0.05<x<=0.08:
+        return 7
+    elif  0.08<x<=0.1:
+        return 8
+    elif  0.1<x<=0.15:
+        return 9
+    else:
+        return 10
+d=train[['item_brand_id_del','is_trade']]
+d['cnt']=1
+d=d.groupby('item_brand_id_del').agg('sum').reset_index()
+d['item_brand_id_after']=d['is_trade']/d['cnt']
+d['item_brand_id_after']=d['item_brand_id_after'].apply(item_brand_id_map)
+d=d[['item_brand_id_after','item_brand_id_del']]
+train=pd.merge(train,d,on='item_brand_id_del',how='left')
+train=train.drop('item_brand_id_del',axis=1)
+def item_city_id_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.015:
+        return 2
+    elif  0.015<x<=0.025:
+        return 3
+    elif  0.025<x<=0.035:
+        return 4
+    elif 0.035<x<=0.05:
+        return 5
+    elif 0.05<x<=0.08:
+        return 6
+    elif 0.08<x<=0.15:
+        return 7
+    else:
+        return 8
+d=train[['item_city_id_del','is_trade']]
+d['cnt']=1
+d=d.groupby('item_city_id_del').agg('sum').reset_index()
+d['item_city_id_after']=d['is_trade']/d['cnt']
+d['item_city_id_after']=d['item_city_id_after'].apply(item_city_id_map)
+d=d[['item_city_id_after','item_city_id_del']]
+train=pd.merge(train,d,on='item_city_id_del',how='left')
+train=train.drop('item_city_id_del',axis=1)
+
 def time2cov(time_):
     '''
     时间是根据天数推移，所以日期为脱敏，但是时间本身不脱敏
@@ -1677,7 +1835,7 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d60,on=['user_id','real_time'],how='left')
 
     
-    other=other.drop(['perdict_category','context_id','perdict_property','predict_category_property','context_timestamp','real_time','real_day','real_hour','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
+    other=other.drop(['shop_id_after','item_id_after','user_id_after','perdict_category','context_id','perdict_property','predict_category_property','context_timestamp','real_time','real_day','real_hour','shop_review_num_level','shop_review_positive_rate','shop_star_level','shop_score_service','shop_score_delivery','shop_score_description','item_property_list','item_brand_id','item_category_list','item_city_id','item_price_level','item_sales_level','item_collected_level','item_pv_level','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
     return other
 
 
@@ -1804,7 +1962,7 @@ def extract_user_shop_feature(dataset,feature):
     return label
 #%%
 def extract_hour_relate_feature(dataset,feature):
-    label=dataset[['instance_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
+    label=dataset[['item_city_id','item_brand_id','shop_id','item_id','instance_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
 #    union=feature[['real_hour','is_trade','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
 # 历史上 每小时的购买转换率  用 real_hour merge   可否进行合并？ 
     d=feature[['real_hour','is_trade']]
@@ -1850,15 +2008,36 @@ def extract_hour_relate_feature(dataset,feature):
     d5=d5.groupby(['user_star_level','real_hour']).agg('sum').reset_index()
     d5['hour_dif_user_star_level_trans_rate']=d5['is_trade']/d5['cnt']
     d5=d5[['real_hour','user_star_level','hour_dif_user_star_level_trans_rate']]
-
+###加入id
+    d6=feature[['user_id','user_id_after']]
+    d6=d6.drop_duplicates()
+#
+    d7=feature[['item_id','item_id_after']]  
+    d7=d7.drop_duplicates()
+#
+    d8=feature[['shop_id','shop_id_after']]    
+    d8=d8.drop_duplicates()
+#
+    d9=feature[['item_brand_id','item_brand_id_after']]    
+    d9=d9.drop_duplicates()
+#
+    d10=feature[['item_city_id','item_city_id_after']]    
+    d10=d10.drop_duplicates()
+      
+    
     label=pd.merge(label,d,on='real_hour',how='left')
     label=pd.merge(label,d1,on='real_hour',how='left')
     label=pd.merge(label,d2,on=['real_hour','user_gender_id'],how='left')
     label=pd.merge(label,d3,on=['real_hour','user_occupation_id'],how='left')
     label=pd.merge(label,d4,on=['real_hour','user_age_level'],how='left')
     label=pd.merge(label,d5,on=['real_hour','user_star_level'],how='left')
-   
-    label=label.drop(['real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
+    label=pd.merge(label,d6,on='user_id',how='left')
+    label=pd.merge(label,d7,on='item_id',how='left')
+    label=pd.merge(label,d8,on='shop_id',how='left')
+    label=pd.merge(label,d9,on='item_brand_id',how='left')
+    label=pd.merge(label,d10,on='item_city_id',how='left')
+  
+    label=label.drop(['item_city_id','item_brand_id','shop_id','item_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
     return label 
 #%%
 """
@@ -2348,27 +2527,27 @@ dataset3=dataset3.fillna(value=-1)
 dataset4=dataset4.fillna(value=-1)
 dataset5=dataset5.fillna(value=-1)
 #%%
-
-le = LabelEncoder()
-dataset1['item_id']=le.fit_transform(dataset1['item_id'])
-dataset1['shop_id']=le.fit_transform(dataset1['shop_id'])
-dataset1['user_id']=le.fit_transform(dataset1['user_id'])
-
-dataset2['item_id']=le.fit_transform(dataset2['item_id'])
-dataset2['shop_id']=le.fit_transform(dataset2['shop_id'])
-dataset2['user_id']=le.fit_transform(dataset2['user_id'])
-
-dataset3['item_id']=le.fit_transform(dataset3['item_id'])
-dataset3['shop_id']=le.fit_transform(dataset3['shop_id'])
-dataset3['user_id']=le.fit_transform(dataset3['user_id'])
-
-dataset4['item_id']=le.fit_transform(dataset4['item_id'])
-dataset4['shop_id']=le.fit_transform(dataset4['shop_id'])
-dataset4['user_id']=le.fit_transform(dataset4['user_id'])
-
-dataset5['item_id']=le.fit_transform(dataset5['item_id'])
-dataset5['shop_id']=le.fit_transform(dataset5['shop_id'])
-dataset5['user_id']=le.fit_transform(dataset5['user_id'])
+#
+#le = LabelEncoder()
+#dataset1['item_id']=le.fit_transform(dataset1['item_id'])
+#dataset1['shop_id']=le.fit_transform(dataset1['shop_id'])
+#dataset1['user_id']=le.fit_transform(dataset1['user_id'])
+#
+#dataset2['item_id']=le.fit_transform(dataset2['item_id'])
+#dataset2['shop_id']=le.fit_transform(dataset2['shop_id'])
+#dataset2['user_id']=le.fit_transform(dataset2['user_id'])
+#
+#dataset3['item_id']=le.fit_transform(dataset3['item_id'])
+#dataset3['shop_id']=le.fit_transform(dataset3['shop_id'])
+#dataset3['user_id']=le.fit_transform(dataset3['user_id'])
+#
+#dataset4['item_id']=le.fit_transform(dataset4['item_id'])
+#dataset4['shop_id']=le.fit_transform(dataset4['shop_id'])
+#dataset4['user_id']=le.fit_transform(dataset4['user_id'])
+#
+#dataset5['item_id']=le.fit_transform(dataset5['item_id'])
+#dataset5['shop_id']=le.fit_transform(dataset5['shop_id'])
+#dataset5['user_id']=le.fit_transform(dataset5['user_id'])
 #%%
 dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
 dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)

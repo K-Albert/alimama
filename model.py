@@ -56,6 +56,11 @@ dataset2=dataset2_raw.copy()
 dataset3=dataset3_raw.copy()
 data_val=data_val_raw.copy()
 #%%
+dataset1=dataset1.drop('item_city_id_after','item_brand_id_after',axis=1)
+dataset2=dataset2.drop('item_city_id_after','item_brand_id_after',axis=1)
+dataset3=dataset3.drop('item_city_id_after','item_brand_id_after',axis=1)
+data_val=data_val.drop('item_city_id_after','item_brand_id_after',axis=1)
+#%%
 
 dataset1=dataset1_raw.sample(frac=0.6,axis=1,random_state=666)
 data_val=data_val_raw.sample(frac=0.6,axis=1,random_state=666)#0.0794244
@@ -183,7 +188,7 @@ dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb
 # 线下学习
-labelvv=np.array(label_val).squeeze()#1644  0.0792826
+labelvv=np.array(label_val).squeeze()#1644  0.0792826  3222  0.0655296
 label22=np.array(label2).squeeze()
 label11=np.array(label1).squeeze()
 watchlist = [(data_val, labelvv)]#watchlist
@@ -195,7 +200,7 @@ gbm = lgb.LGBMRegressor(objective='binary',
                         min_child_samples=100,
                         max_depth=3,
                         learning_rate=0.01,
-                        n_estimators=1644,
+                        n_estimators=4000,
                         colsample_bytree = 0.5,
                         subsample = 0.6,
                         seed=0
@@ -221,7 +226,7 @@ gbm = lgb.LGBMRegressor(objective='binary',
                         min_child_samples=100,
                         max_depth=3,
                         learning_rate=0.01,
-                        n_estimators=1644,
+                        n_estimators=3222,
                         colsample_bytree = 0.5,
                         subsample = 0.6,
                         seed=0
@@ -240,7 +245,7 @@ d=test_b[['instance_id']]
 dataset3_pre=test[['instance_id']]
 dataset3_pre['predicted_score']=gbm.predict(dataset3,num_iteration=gbm.best_iteration_)
 dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
-dataset3_pre.to_csv('20180420_0.0792826_gbm.txt',sep=" ",index=False)
+dataset3_pre.to_csv('data/20180420_0.0655296_gbm.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 #gbm = lgb.LGBMRegressor(objective='binary',

@@ -5,22 +5,35 @@ Created on Fri Apr 20 12:47:44 2018
 @author: surface
 """
 #%%
-dataset1_1=dataset1_raw.sample(frac=0.6,axis=1,random_state=666666)#1559 0.0794297
-data_val1=data_val_raw.sample(frac=0.6,axis=1,random_state=666666)
+#dataset1_1=dataset1_raw.sample(frac=0.6,axis=1,random_state=666666)#1559 0.0794297
+#data_val1=data_val_raw.sample(frac=0.6,axis=1,random_state=666666)
 
 dataset1_2=dataset1_raw.sample(frac=0.6,axis=1,random_state=666)
 data_val2=data_val_raw.sample(frac=0.6,axis=1,random_state=666)#1527  0.0793547
 
-dataset1_3=dataset1_raw.sample(frac=0.6,axis=1,random_state=10)
-data_val3=data_val_raw.sample(frac=0.6,axis=1,random_state=10)#1817 0.0794175
+#dataset1_3=dataset1_raw.sample(frac=0.6,axis=1,random_state=10)
+#data_val3=data_val_raw.sample(frac=0.6,axis=1,random_state=10)#1817 0.0794175
 
 dataset1_4=dataset1_raw.sample(frac=0.6,axis=1,random_state=222)
 data_val4=data_val_raw.sample(frac=0.6,axis=1,random_state=222)#1825  0.0793614
+#%%
+dataset1_5=dataset1_raw.sample(frac=0.6,axis=1,random_state=22)
+data_val5=data_val_raw.sample(frac=0.6,axis=1,random_state=22)#1712 0.795629 no
 
-#dataset1_5=dataset1_raw.sample(frac=0.6,axis=1,random_state=66)
-#data_val5=data_val_raw.sample(frac=0.6,axis=1,random_state=66)#1712 0.795629 no
-#
-#dataset1_6=dataset1_raw.sample(frac=0.6,axis=1,random_state=6666)
+watchlist = [(data_val5, labelvv)]#watchlist
+gbm5 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=3000,
+                        colsample_bytree = 0.5,
+                        subsample = 0.6,
+                        seed=0
+                        )
+gbm5.fit(dataset1_5,label11,
+    eval_set=watchlist,
+    eval_metric=['binary_logloss'],
+    early_stopping_rounds= 100)#dataset1_6=dataset1_raw.sample(frac=0.6,axis=1,random_state=6666)
 #data_val6=data_val_raw.sample(frac=0.6,axis=1,random_state=6666)#1771 0.7955033
 ##%%
 #dataset1_7=dataset1_raw.sample(frac=0.6,axis=1,random_state=11)
@@ -93,21 +106,7 @@ gbm4.fit(dataset1_4,label11,
     eval_set=watchlist,
     eval_metric=['binary_logloss'],
     early_stopping_rounds= 100)
-#%%
-watchlist = [(data_val5, labelvv)]#watchlist
-gbm5 = lgb.LGBMRegressor(objective='binary',
-                        min_child_samples=100,
-                        max_depth=3,
-                        learning_rate=0.01,
-                        n_estimators=3000,
-                        colsample_bytree = 0.5,
-                        subsample = 0.6,
-                        seed=0
-                        )
-gbm5.fit(dataset1_5,label11,
-    eval_set=watchlist,
-    eval_metric=['binary_logloss'],
-    early_stopping_rounds= 100)
+
 #%%
 watchlist = [(data_val6, labelvv)]#watchlist
 gbm6 = lgb.LGBMRegressor(objective='binary',
@@ -143,11 +142,11 @@ feature_importance1=pd.Series(gbm1.feature_importances_)
 feature_importance1.index=data_val1.columns
 #%%
 from sklearn.cross_validation import KFold
-base_models=[gbm,gbm1,gbm2,gbm3,gbm4]
-X=[dataset1,dataset1_1,dataset1_2,dataset1_3,dataset1_4]
+base_models=[gbm,gbm2,gbm4]
+X=[dataset1,dataset1_2,dataset1_4]
 y=label1
 y=np.array(y).squeeze()
-T=[data_val,data_val1,data_val2,data_val3,data_val4]
+T=[data_val,data_val2,data_val4]
 
 folds = list(KFold(len(y), n_folds=5, shuffle=True, random_state=2018))
 
@@ -170,11 +169,11 @@ for i, clf in enumerate(base_models):
     print(i)
 
 #%%
-stacker=lgb.LGBMRegressor(objective='binary',#0.0792773 740
+stacker=lgb.LGBMRegressor(objective='binary',#0.0792114 740
                         min_child_samples=100,
                         max_depth=3,
                         learning_rate=0.01,
-                        n_estimators=740,
+                        n_estimators=890,
                         colsample_bytree = 0.5,
                         subsample = 0.6,
                         seed=0

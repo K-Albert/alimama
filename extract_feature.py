@@ -9,6 +9,8 @@ import time
 import pandas as pd
 import os 
 import numpy as np
+from sklearn.preprocessing import LabelEncoder,OneHotEncoder
+from scipy import sparse
 os.getcwd() #get current working directory
 os.chdir('F:\\006@天池\\0003@阿里妈妈')#change working directory
 #%%
@@ -20,15 +22,37 @@ test_a = pd.read_csv('data/round1_ijcai_18_test_a_20180301.txt',sep=" ")
 test_b = pd.read_csv('data/round1_ijcai_18_test_b_20180418.txt',sep=" ")
 test=pd.concat([test_a,test_b]).reset_index(drop=True)
 
+#from sklearn.linear_model import LogisticRegression
+#enc = OneHotEncoder()
+#a=enc.fit_transform(dataset1['second_category'].values.reshape(-1,1))
+#b=enc.fit_transform(dataset1['context_page_id'].values.reshape(-1,1))
+#c=sparse.hstack((a,b))
+#
+#lr=LogisticRegression()
+#lr.fit(c,label1)
+#
+#d=pd.get_dummies(dataset1['second_category'])
+
 le = LabelEncoder()
-#test['user_id_del']=le.fit_transform(test['user_id'])
-#test['shop_id_del']=le.fit_transform(test['shop_id'])
-#test['user_id_del']=le.fit_transform(test['user_id'])
+test['user_id_del']=le.fit_transform(test['user_id'])
+test['shop_id_del']=le.fit_transform(test['shop_id'])
+test['item_id_del']=le.fit_transform(test['item_id'])
+test['item_brand_id_del']=le.fit_transform(test['item_brand_id'])
+test['item_city_id_del']=le.fit_transform(test['item_city_id'])
+test['shop_review_positive_rate_del']=le.fit_transform(test['shop_review_positive_rate'])
+test['shop_score_delivery_del']=le.fit_transform(test['shop_score_delivery'])
+test['shop_score_description_del']=le.fit_transform(test['shop_score_description'])
+test['shop_score_service_del']=le.fit_transform(test['shop_score_service'])
+
 train['user_id_del']=le.fit_transform(train['user_id'])
 train['shop_id_del']=le.fit_transform(train['shop_id'])
 train['item_id_del']=le.fit_transform(train['item_id'])
 train['item_brand_id_del']=le.fit_transform(train['item_brand_id'])
 train['item_city_id_del']=le.fit_transform(train['item_city_id'])
+train['shop_review_positive_rate_del']=le.fit_transform(train['shop_review_positive_rate'])
+train['shop_score_delivery_del']=le.fit_transform(train['shop_score_delivery'])
+train['shop_score_description_del']=le.fit_transform(train['shop_score_description'])
+train['shop_score_service_del']=le.fit_transform(train['shop_score_service'])
 
 def user_id_map(x):
     if x==0:
@@ -53,14 +77,7 @@ def user_id_map(x):
         return 9
     else:
         return 10 
-d=train[['user_id_del','is_trade']]
-d['cnt']=1
-d=d.groupby('user_id_del').agg('sum').reset_index()
-d['user_id_after']=d['is_trade']/d['cnt']
-d['user_id_after']=d['user_id_after'].apply(user_id_map)
-d=d[['user_id_after','user_id_del']]
-train=pd.merge(train,d,on='user_id_del',how='left')
-train=train.drop('user_id_del',axis=1)
+
 def shop_id_map(x):
     if x==0:
         return 0
@@ -80,15 +97,15 @@ def shop_id_map(x):
         return 7
     else:
         return 8 
-d=train[['shop_id_del','is_trade']]
-d['cnt']=1
-d=d.groupby('shop_id_del').agg('sum').reset_index()
-d['shop_id_after']=d['is_trade']/d['cnt']
-
-d['shop_id_after']=d['shop_id_after'].apply(shop_id_map)
-d=d[['shop_id_after','shop_id_del']]
-train=pd.merge(train,d,on='shop_id_del',how='left')
-train=train.drop('shop_id_del',axis=1)
+#d=train[['shop_id_del','is_trade']]
+#d['cnt']=1
+#d=d.groupby('shop_id_del').agg('sum').reset_index()
+#d['shop_id_after']=d['is_trade']/d['cnt']
+#
+#d['shop_id_after']=d['shop_id_after'].apply(shop_id_map)
+#d=d[['shop_id_after','shop_id_del']]
+#train=pd.merge(train,d,on='shop_id_del',how='left')
+#train=train.drop('shop_id_del',axis=1)
 def item_id_map(x):
     if x==0:
         return 0
@@ -110,14 +127,14 @@ def item_id_map(x):
         return 8
     else:
         return 9 
-d=train[['item_id_del','is_trade']]
-d['cnt']=1
-d=d.groupby('item_id_del').agg('sum').reset_index()
-d['item_id_after']=d['is_trade']/d['cnt']
-d['item_id_after']=d['item_id_after'].apply(item_id_map)
-d=d[['item_id_after','item_id_del']]
-train=pd.merge(train,d,on='item_id_del',how='left')
-train=train.drop('item_id_del',axis=1)
+#d=train[['item_id_del','is_trade']]
+#d['cnt']=1
+#d=d.groupby('item_id_del').agg('sum').reset_index()
+#d['item_id_after']=d['is_trade']/d['cnt']
+#d['item_id_after']=d['item_id_after'].apply(item_id_map)
+#d=d[['item_id_after','item_id_del']]
+#train=pd.merge(train,d,on='item_id_del',how='left')
+#train=train.drop('item_id_del',axis=1)
 def item_brand_id_map(x):
     if x==0:
         return 0
@@ -141,14 +158,14 @@ def item_brand_id_map(x):
         return 9
     else:
         return 10
-d=train[['item_brand_id_del','is_trade']]
-d['cnt']=1
-d=d.groupby('item_brand_id_del').agg('sum').reset_index()
-d['item_brand_id_after']=d['is_trade']/d['cnt']
-d['item_brand_id_after']=d['item_brand_id_after'].apply(item_brand_id_map)
-d=d[['item_brand_id_after','item_brand_id_del']]
-train=pd.merge(train,d,on='item_brand_id_del',how='left')
-train=train.drop('item_brand_id_del',axis=1)
+#d=train[['item_brand_id_del','is_trade']]
+#d['cnt']=1
+#d=d.groupby('item_brand_id_del').agg('sum').reset_index()
+#d['item_brand_id_after']=d['is_trade']/d['cnt']
+#d['item_brand_id_after']=d['item_brand_id_after'].apply(item_brand_id_map)
+#d=d[['item_brand_id_after','item_brand_id_del']]
+#train=pd.merge(train,d,on='item_brand_id_del',how='left')
+#train=train.drop('item_brand_id_del',axis=1)
 def item_city_id_map(x):
     if x==0:
         return 0
@@ -168,15 +185,101 @@ def item_city_id_map(x):
         return 7
     else:
         return 8
-d=train[['item_city_id_del','is_trade']]
-d['cnt']=1
-d=d.groupby('item_city_id_del').agg('sum').reset_index()
-d['item_city_id_after']=d['is_trade']/d['cnt']
-d['item_city_id_after']=d['item_city_id_after'].apply(item_city_id_map)
-d=d[['item_city_id_after','item_city_id_del']]
-train=pd.merge(train,d,on='item_city_id_del',how='left')
-train=train.drop('item_city_id_del',axis=1)
+    
+def shop_review_positive_rate_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.015:
+        return 2
+    elif  0.015<x<=0.025:
+        return 3
+    elif  0.025<x<=0.035:
+        return 4
+    elif 0.035<x<=0.05:
+        return 5
+    elif 0.05<x<=0.08:
+        return 6
+    elif 0.08<x<=0.1:
+        return 7
+    elif 0.1<x<=0.2:
+        return 8 
+    elif 0.2<x<=0.5:
+        return 9
+    else:
+        return 10
 
+def shop_score_delivery_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.015:
+        return 2
+    elif  0.015<x<=0.025:
+        return 3
+    elif  0.025<x<=0.035:
+        return 4
+    elif 0.035<x<=0.045:
+        return 5
+    elif 0.045<x<=0.055:
+        return 6
+    elif 0.055<x<=0.1:
+        return 7
+    elif 0.1<x<=0.2:
+        return 8 
+    elif 0.2<x<0.5:
+        return 9
+    else:
+        return 10
+
+def shop_score_description_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.015:
+        return 2
+    elif  0.015<x<=0.025:
+        return 3
+    elif  0.025<x<=0.035:
+        return 4
+    elif 0.035<x<=0.045:
+        return 5
+    elif 0.045<x<=0.055:
+        return 6
+    elif 0.055<x<=0.1:
+        return 7
+    elif 0.1<x<=0.2:
+        return 8 
+    elif 0.2<x<0.5:
+        return 9
+    else:
+        return 10
+def shop_score_service_map(x):
+    if x==0:
+        return 0
+    elif 0<x<=0.01:
+        return 1
+    elif 0.01< x <=0.015:
+        return 2
+    elif  0.015<x<=0.025:
+        return 3
+    elif  0.025<x<=0.035:
+        return 4
+    elif 0.035<x<=0.045:
+        return 5
+    elif 0.045<x<=0.055:
+        return 6
+    elif 0.055<x<=0.1:
+        return 7
+    elif 0.1<x<=0.2:
+        return 8 
+    elif 0.2<x<0.5:
+        return 9
+    else:
+        return 10
 def time2cov(time_):
     '''
     时间是根据天数推移，所以日期为脱敏，但是时间本身不脱敏
@@ -1962,7 +2065,7 @@ def extract_user_shop_feature(dataset,feature):
     return label
 #%%
 def extract_hour_relate_feature(dataset,feature):
-    label=dataset[['item_city_id','item_brand_id','shop_id','item_id','instance_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
+    label=dataset[['shop_score_description_del','shop_score_service_del','shop_score_delivery_del','item_brand_id_del','item_city_id_del','shop_review_positive_rate_del','item_id_del','shop_id_del','user_id_del','item_city_id','item_brand_id','shop_id','item_id','instance_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
 #    union=feature[['real_hour','is_trade','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level']]
 # 历史上 每小时的购买转换率  用 real_hour merge   可否进行合并？ 
     d=feature[['real_hour','is_trade']]
@@ -2009,21 +2112,79 @@ def extract_hour_relate_feature(dataset,feature):
     d5['hour_dif_user_star_level_trans_rate']=d5['is_trade']/d5['cnt']
     d5=d5[['real_hour','user_star_level','hour_dif_user_star_level_trans_rate']]
 ###加入id
-    d6=feature[['user_id','user_id_after']]
-    d6=d6.drop_duplicates()
+    d6=feature[['user_id_del','is_trade']]
+    d6['cnt']=1
+    d6=d6.groupby('user_id_del').agg('sum').reset_index()
+    d6['user_id_after']=d6['is_trade']/d6['cnt']
+    d6['user_id_after']=d6['user_id_after'].apply(user_id_map)
+    d6=d6[['user_id_after','user_id_del']]
 #
-    d7=feature[['item_id','item_id_after']]  
-    d7=d7.drop_duplicates()
+    d7=feature[['shop_id_del','is_trade']]
+    d7['cnt']=1
+    d7=d7.groupby('shop_id_del').agg('sum').reset_index()
+    d7['shop_id_after']=d7['is_trade']/d7['cnt']
+    
+    d7['shop_id_after']=d7['shop_id_after'].apply(shop_id_map)
+    d7=d7[['shop_id_after','shop_id_del']]
 #
-    d8=feature[['shop_id','shop_id_after']]    
-    d8=d8.drop_duplicates()
-#
-    d9=feature[['item_brand_id','item_brand_id_after']]    
+    d8=feature[['item_id_del','is_trade']]
+    d8['cnt']=1
+    d8=d8.groupby('item_id_del').agg('sum').reset_index()
+    d8['item_id_after']=d8['is_trade']/d8['cnt']
+    d8['item_id_after']=d8['item_id_after'].apply(item_id_map)
+    d8=d8[['item_id_after','item_id_del']]
+##
+    d9=feature[['item_brand_id_del','is_trade']]
+    d9['cnt']=1
+    d9=d9.groupby('item_brand_id_del').agg('sum').reset_index()
+    d9['item_brand_id_after']=d9['is_trade']/d9['cnt']
+    d9['item_brand_id_after']=d9['item_brand_id_after'].apply(item_brand_id_map)
+    d9=d9[['item_brand_id_after','item_brand_id_del']]    
     d9=d9.drop_duplicates()
-#
-    d10=feature[['item_city_id','item_city_id_after']]    
+##
+    d10=feature[['item_city_id_del','is_trade']]
+    d10['cnt']=1
+    d10=d10.groupby('item_city_id_del').agg('sum').reset_index()
+    d10['item_city_id_after']=d10['is_trade']/d10['cnt']
+    d10['item_city_id_after']=d10['item_city_id_after'].apply(item_city_id_map)
+    d10=d10[['item_city_id_after','item_city_id_del']]      
     d10=d10.drop_duplicates()
-      
+###      
+    d11=feature[['shop_review_positive_rate_del','is_trade']]
+    d11['cnt']=1
+    d11=d11.groupby('shop_review_positive_rate_del').agg('sum').reset_index()
+    d11['shop_review_positive_rate_after']=d11['is_trade']/d11['cnt']
+        
+    d11['shop_review_positive_rate_after']=d11['shop_review_positive_rate_after'].apply(shop_review_positive_rate_map)
+    d11=d11[['shop_review_positive_rate_after','shop_review_positive_rate_del']]      
+    d11=d11.drop_duplicates()
+###
+    d12=feature[['shop_score_delivery_del','is_trade']]
+    d12['cnt']=1
+    d12=d12.groupby('shop_score_delivery_del').agg('sum').reset_index()
+    d12['shop_score_delivery_del_after']=d12['is_trade']/d12['cnt']
+        
+    d12['shop_score_delivery_del_after']=d12['shop_score_delivery_del_after'].apply(shop_score_delivery_map)
+    d12=d12[['shop_score_delivery_del_after','shop_score_delivery_del']]      
+    d12=d12.drop_duplicates()
+### 
+    d13=feature[['shop_score_description_del','is_trade']]
+    d13['cnt']=1
+    d13=d13.groupby('shop_score_description_del').agg('sum').reset_index()
+    d13['shop_score_description_after']=d13['is_trade']/d13['cnt']
+        
+    d13['shop_score_description_after']=d13['shop_score_description_after'].apply(shop_score_description_map)
+    d13=d13[['shop_score_description_after','shop_score_description_del']]      
+    d13=d13.drop_duplicates()
+####
+    d14=feature[['shop_score_service_del','is_trade']]
+    d14['cnt']=1
+    d14=d14.groupby('shop_score_service_del').agg('sum').reset_index()
+    d14['shop_score_service_del_after']=d14['is_trade']/d14['cnt']
+        
+    d14['shop_score_service_del_after']=d14['shop_score_service_del_after'].apply(shop_score_service_map)
+    d14=d14[['shop_score_service_del_after','shop_score_service_del']]      
+    d14=d14.drop_duplicates()    
     
     label=pd.merge(label,d,on='real_hour',how='left')
     label=pd.merge(label,d1,on='real_hour',how='left')
@@ -2031,13 +2192,17 @@ def extract_hour_relate_feature(dataset,feature):
     label=pd.merge(label,d3,on=['real_hour','user_occupation_id'],how='left')
     label=pd.merge(label,d4,on=['real_hour','user_age_level'],how='left')
     label=pd.merge(label,d5,on=['real_hour','user_star_level'],how='left')
-    label=pd.merge(label,d6,on='user_id',how='left')
-    label=pd.merge(label,d7,on='item_id',how='left')
-    label=pd.merge(label,d8,on='shop_id',how='left')
-    label=pd.merge(label,d9,on='item_brand_id',how='left')
-    label=pd.merge(label,d10,on='item_city_id',how='left')
-  
-    label=label.drop(['item_city_id','item_brand_id','shop_id','item_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
+#    label=pd.merge(label,d6,on='user_id_del',how='left')
+#    label=pd.merge(label,d7,on='shop_id_del',how='left')
+#    label=pd.merge(label,d8,on='item_id_del',how='left')
+#    label=pd.merge(label,d9,on='item_brand_id_del',how='left')
+#    label=pd.merge(label,d10,on='item_city_id_del',how='left')
+#    label=pd.merge(label,d11,on='shop_review_positive_rate_del',how='left')
+#    label=pd.merge(label,d12,on='shop_score_delivery_del',how='left')
+#    label=pd.merge(label,d13,on='shop_score_description_del',how='left')
+#    label=pd.merge(label,d14,on='shop_score_service_del',how='left')
+#  
+    label=label.drop(['shop_score_delivery_del','shop_score_description_del','shop_score_service_del','item_brand_id_del','item_city_id_del','shop_review_positive_rate_del','item_id_del','shop_id_del','user_id_del','item_city_id','item_brand_id','shop_id','item_id','real_hour','user_id','user_gender_id','user_age_level','user_occupation_id','user_star_level'],axis=1)
     return label 
 #%%
 """

@@ -44,6 +44,7 @@ data_val_raw.drop(['is_trade'],axis=1,inplace=True)
 dataset1_raw.drop(['instance_id'],axis=1,inplace=True)
 dataset2_raw.drop(['instance_id'],axis=1,inplace=True)
 data_val_raw.drop(['instance_id'],axis=1,inplace=True)
+#%%
 
 le = LabelEncoder()
 dataset1_raw['second_category']=le.fit_transform(dataset1_raw['second_category'])
@@ -56,10 +57,26 @@ dataset2=dataset2_raw.copy()
 dataset3=dataset3_raw.copy()
 data_val=data_val_raw.copy()
 #%%
-dataset1=dataset1.drop('item_city_id_after','item_brand_id_after',axis=1)
-dataset2=dataset2.drop('item_city_id_after','item_brand_id_after',axis=1)
-dataset3=dataset3.drop('item_city_id_after','item_brand_id_after',axis=1)
-data_val=data_val.drop('item_city_id_after','item_brand_id_after',axis=1)
+dataset1=dataset1.drop(['item_city_id_after','item_brand_id_after'],axis=1)
+dataset2=dataset2.drop(['item_city_id_after','item_brand_id_after'],axis=1)
+dataset3=dataset3.drop(['item_city_id_after','item_brand_id_after'],axis=1)
+data_val=data_val.drop(['item_city_id_after','item_brand_id_after'],axis=1)
+#%%
+dataset1=dataset1.drop(['shop_score_description','shop_score_service','shop_score_delivery','shop_review_positive_rate'],axis=1)
+dataset2=dataset2.drop(['shop_score_description','shop_score_service','shop_score_delivery','shop_review_positive_rate'],axis=1)
+dataset3=dataset3.drop(['shop_score_description','shop_score_service','shop_score_delivery','shop_review_positive_rate'],axis=1)
+data_val=data_val.drop(['shop_score_description','shop_score_service','shop_score_delivery','shop_review_positive_rate'],axis=1)
+#%%
+dataset1=dataset1.drop(['user_id_after','item_id_after'],axis=1)
+dataset2=dataset2.drop(['user_id_after','item_id_after'],axis=1)
+dataset3=dataset3.drop(['user_id_after','item_id_after'],axis=1)
+data_val=data_val.drop(['user_id_after','item_id_after'],axis=1)
+#%%
+dataset1=dataset1.drop(['shop_score_description_after','shop_score_service_del_after','shop_score_delivery_del_after','shop_review_positive_rate_after'],axis=1)
+dataset2=dataset2.drop(['shop_score_description_after','shop_score_service_del_after','shop_score_delivery_del_after','shop_review_positive_rate_after'],axis=1)
+dataset3=dataset3.drop(['shop_score_description_after','shop_score_service_del_after','shop_score_delivery_del_after','shop_review_positive_rate_after'],axis=1)
+data_val=data_val.drop(['shop_score_description_after','shop_score_service_del_after','shop_score_delivery_del_after','shop_review_positive_rate_after'],axis=1)
+
 #%%
 
 dataset1=dataset1_raw.sample(frac=0.6,axis=1,random_state=666)
@@ -82,10 +99,10 @@ dataset2=dataset2.drop('label_user_ith_click_normalize',axis=1)
 dataset3=dataset3.drop('label_user_ith_click_normalize',axis=1)
 data_val=data_val.drop('label_user_ith_click_normalize',axis=1)
 #%%
-dataset1=dataset1.drop('user_id','item_id','shop_id',axis=1)
-dataset2=dataset2.drop('user_id','item_id','shop_id',axis=1)
-dataset3=dataset3.drop('user_id','item_id','shop_id',axis=1)
-data_val=data_val.drop('user_id','item_id','shop_id',axis=1)
+dataset1=dataset1.drop(['user_id_after','item_id_after','shop_id_after'],axis=1)
+dataset2=dataset2.drop(['user_id_after','item_id_after','shop_id_after'],axis=1)
+dataset3=dataset3.drop(['user_id_after','item_id_after','shop_id_after'],axis=1)
+data_val=data_val.drop(['user_id_after','item_id_after','shop_id_after'],axis=1)
 
 #%%
 dataset1['label_item_and_time']=(dataset1['label_is_latest_time000'].astype('bool')&dataset1['label_item_id_has_ever'].astype('bool')).astype('int')
@@ -123,6 +140,12 @@ dataset1=dataset1.drop('label_is_latest_time',axis=1)
 dataset2=dataset2.drop('label_is_latest_time',axis=1)
 dataset3=dataset3.drop('label_is_latest_time',axis=1)
 data_val=data_val.drop('label_is_latest_time',axis=1)
+#%%
+dataset1=dataset1.drop(['user_buy_dif_merchant_brand_rate','user_buy_dif_merchant_city_rate','user_buy_mean_merchant_sales_level_y','user_buy_cnt','label_item_price_up','label_user_per_hour_trans_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_dif_shop_cnt','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_star_level','user_buy_mean_shop_score_delivery','user_item_city_buy_rate','user_item_pv_level_buy_rate','label_now_day_how_many_shop','label_now_item_price_level_bigger','label_now_item_sales_level_bigger','label_now_item_collected_level_bigger','label_now_user_cat2_item_price_lower','shop_score_service_bigger'],axis=1)
+dataset2=dataset2.drop(['user_buy_dif_merchant_brand_rate','user_buy_dif_merchant_city_rate','user_buy_mean_merchant_sales_level_y','user_buy_cnt','label_item_price_up','label_user_per_hour_trans_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_dif_shop_cnt','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_star_level','user_buy_mean_shop_score_delivery','user_item_city_buy_rate','user_item_pv_level_buy_rate','label_now_day_how_many_shop','label_now_item_price_level_bigger','label_now_item_sales_level_bigger','label_now_item_collected_level_bigger','label_now_user_cat2_item_price_lower','shop_score_service_bigger'],axis=1)
+dataset3=dataset3.drop(['user_buy_dif_merchant_brand_rate','user_buy_dif_merchant_city_rate','user_buy_mean_merchant_sales_level_y','user_buy_cnt','label_item_price_up','label_user_per_hour_trans_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_dif_shop_cnt','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_star_level','user_buy_mean_shop_score_delivery','user_item_city_buy_rate','user_item_pv_level_buy_rate','label_now_day_how_many_shop','label_now_item_price_level_bigger','label_now_item_sales_level_bigger','label_now_item_collected_level_bigger','label_now_user_cat2_item_price_lower','shop_score_service_bigger'],axis=1)
+data_val=data_val.drop(['user_buy_dif_merchant_brand_rate','user_buy_dif_merchant_city_rate','user_buy_mean_merchant_sales_level_y','user_buy_cnt','label_item_price_up','label_user_per_hour_trans_rate','user_buy_dif_merchant_cnt','user_buy_dif_merchant_brand_cnt','user_buy_dif_merchant_city_cnt','user_buy_dif_merchant_price_cnt','user_buy_dif_merchant_sales_cnt','user_buy_dif_merchant_collected_cnt','user_buy_dif_shop_cnt','user_buy_dif_shop_review_num_level_cnt','user_buy_dif_shop_star_level_cnt','user_buy_mean_shop_star_level','user_buy_mean_shop_score_delivery','user_item_city_buy_rate','user_item_pv_level_buy_rate','label_now_day_how_many_shop','label_now_item_price_level_bigger','label_now_item_sales_level_bigger','label_now_item_collected_level_bigger','label_now_user_cat2_item_price_lower','shop_score_service_bigger'],axis=1)
+
 #%%
 label_item_id_has_ever
 label_is_latest_time
@@ -188,7 +211,7 @@ dataset3_pre.drop_duplicates(inplace=True)
 #%%
 import lightgbm as lgb
 # 线下学习
-labelvv=np.array(label_val).squeeze()#1644  0.0792826  3222  0.0655296
+labelvv=np.array(label_val).squeeze()#1644  0.0792826  3222  0.0655296  1656 0.0793719
 label22=np.array(label2).squeeze()
 label11=np.array(label1).squeeze()
 watchlist = [(data_val, labelvv)]#watchlist
@@ -221,31 +244,33 @@ label11=np.array(label1).squeeze()
 #watchlist = [(data_val, labelvv)]#watchlist
 watchlist = [(dataset2, label22)]#watchlist
 
-gbm = lgb.LGBMRegressor(objective='binary',
+gbm_sub = lgb.LGBMRegressor(objective='binary',
                         #is_unbalance=True,
                         min_child_samples=100,
                         max_depth=3,
                         learning_rate=0.01,
-                        n_estimators=3222,
+                        n_estimators=2470,
                         colsample_bytree = 0.5,
                         subsample = 0.6,
                         seed=0
                         )
 #               
-gbm.fit(dataset2,label22,
+gbm_sub.fit(dataset2,label22,
     eval_set=watchlist,
     eval_metric=['binary_logloss'],
     early_stopping_rounds= 100)
 #%%
 from sklearn.metrics import log_loss
 print(log_loss(y_train,y_tt))
-
+#%%
+feature_importance=pd.Series(gbm_sub.feature_importances_)
+feature_importance.index=dataset3.columns
 #%%
 d=test_b[['instance_id']]
 dataset3_pre=test[['instance_id']]
-dataset3_pre['predicted_score']=gbm.predict(dataset3,num_iteration=gbm.best_iteration_)
+dataset3_pre['predicted_score']=gbm_sub.predict(dataset3)
 dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
-dataset3_pre.to_csv('data/20180420_0.0655296_gbm.txt',sep=" ",index=False)
+dataset3_pre.to_csv('data/20180421_0.0733115_gbm.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
 #%%
 #gbm = lgb.LGBMRegressor(objective='binary',

@@ -22,6 +22,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import LabelEncoder,OneHotEncoder
 from scipy import sparse
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 #%%
 dataset5=pd.read_csv('data/dataset5.csv')
 dataset4=pd.read_csv('data/dataset4.csv')
@@ -48,7 +50,21 @@ dataset1_raw.drop(['instance_id'],axis=1,inplace=True)
 dataset2_raw.drop(['instance_id'],axis=1,inplace=True)
 data_val_raw.drop(['instance_id'],axis=1,inplace=True)
 #%%
-#首先将user_id,item_id,item_brand_id,item_city_id,item_price_level,item_sales_level,item_collected_level,item_pv_level,user_id,user_gender_id,user_age_level,user_occupation_id,user_star_level,shop_id,shop_review_num_level,shop_star_level
+dataset1=dataset1_raw.copy()
+dataset2=dataset2_raw.copy()
+dataset3=dataset3_raw.copy()
+data_val=data_val_raw.copy()
+#%%
+dataset1=dataset1.drop(['user_id','item_id','shop_id'],axis=1)
+dataset2=dataset2.drop(['user_id','item_id','shop_id'],axis=1)
+dataset3=dataset3.drop(['user_id','item_id','shop_id'],axis=1)
+data_val=data_val.drop(['user_id','item_id','shop_id'],axis=1)
+
+#%%
+#user_id,item_id,
+#首先将item_brand_id,item_city_id,item_price_level,item_sales_level,item_collected_level,item_pv_level,
+#user_id,user_gender_id,user_age_level,user_occupation_id,user_star_level
+#shop_id,shop_review_num_level,shop_star_level
 feats=np.array(["item_price_level","item_sales_level","item_collected_level","item_pv_level"])
 dataset1_item=dataset1_raw[feats]
 data_val_item=data_val_raw[feats]
@@ -74,7 +90,8 @@ grd.fit(x_train, y_train)
 grd_enc=OneHotEncoder()
 # fit one-hot编码器
 grd_enc.fit(grd.apply(x_train)[:, :, 0])
-ddd=grd_enc.transform(grd.apply(x_train)[:, :, 0])
+grd_item_feature=grd_enc.transform(grd.apply(x_train)[:, :, 0])
+grd_item_feature=pd.DataFrame(grd_item_feature.toarray())
 ''' 
 使用训练好的GBDT模型构建特征，然后将特征经过one-hot编码作为新的特征输入到LR模型训练。
 '''
@@ -91,10 +108,235 @@ dataset2_raw['second_category']=le.fit_transform(dataset2_raw['second_category']
 dataset3_raw['second_category']=le.fit_transform(dataset3_raw['second_category'])
 data_val_raw['second_category']=le.fit_transform(data_val_raw['second_category'])
 #%%
-dataset1=dataset1_raw.copy()
-dataset2=dataset2_raw.copy()
-dataset3=dataset3_raw.copy()
-data_val=data_val_raw.copy()
+dataset1_1=dataset1_raw.sample(frac=0.6,axis=1,random_state=666)
+data_val_1=data_val_raw.sample(frac=0.6,axis=1,random_state=666)#0.0794244
+
+dataset1_2=dataset1_raw.sample(frac=0.6,axis=1,random_state=111)
+data_val_2=data_val_raw.sample(frac=0.6,axis=1,random_state=111)#0.0797
+
+dataset1_3=dataset1_raw.sample(frac=0.6,axis=1,random_state=2018)
+data_val_3=data_val_raw.sample(frac=0.6,axis=1,random_state=2018)#0.079716
+#%%
+dataset1_1=dataset1_raw.iloc[:,0:70]
+data_val_1=data_val_raw.iloc[:,0:70]
+
+dataset1_2=dataset1_raw.iloc[:,70:140]
+data_val_2=data_val_raw.iloc[:,70:140]
+
+dataset1_3=dataset1_raw.iloc[:,140:201]
+data_val_3=data_val_raw.iloc[:,140:201]
+#%%
+#X_train, X_train_lr, y_train, y_train_lr = train_test_split(dataset1, label1, test_size=0.5)
+#X_test = data_val
+#X_train=dataset1
+#y_train=label1
+#X_train_lr=X_train
+#y_train_lr=y_train
+import lightgbm as lgb
+# 线下学习
+labelvv=np.array(label_val).squeeze()#1644  0.0792826  3222  0.0655296  1656 0.0793719
+y_train=np.array(y_train).squeeze()
+label1=np.array(label1).squeeze()
+gbm = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=8,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm.fit(dataset1,label1)
+#watchlist = [(data_val, labelvv)]#watchlist
+gbm1 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=8,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm1.fit(dataset1_1,label1)
+#    eval_set=watchlist,
+#    eval_metric=['binary_logloss'],
+#    early_stopping_rounds= 100)
+gbm2 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=8,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm2.fit(dataset1_2,label1)
+#    eval_set=watchlist,
+#    eval_metric=['binary_logloss'],
+#    early_stopping_rounds= 100)
+gbm3 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=8,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm3.fit(dataset1_3,label1)
+#    eval_set=watchlist,
+#    eval_metric=['binary_logloss'],
+#    early_stopping_rounds= 100)
+grd_enc=OneHotEncoder()
+grd_enc.fit(gbm.apply(dataset1))
+
+grd_enc1=OneHotEncoder()
+grd_enc1.fit(gbm1.apply(dataset1_1))
+
+grd_enc2=OneHotEncoder()
+grd_enc2.fit(gbm2.apply(dataset1_2))
+
+grd_enc3=OneHotEncoder()
+grd_enc3.fit(gbm3.apply(dataset1_3))
+
+grd_lm = LogisticRegression(random_state=0,verbose=1,max_iter =100)
+
+g0=grd_enc.transform(gbm.apply(dataset1))
+g1=grd_enc1.transform(gbm1.apply(dataset1_1))
+g2=grd_enc2.transform(gbm2.apply(dataset1_2))
+g3=grd_enc3.transform(gbm3.apply(dataset1_3))
+
+g=sparse.hstack((g0,g1))
+g=sparse.hstack((g,g2))
+g=sparse.hstack((g,g3))
+
+grd_lm.fit(g, label1)
+
+g_t0=grd_enc.transform(gbm.apply(data_val))
+g_t1=grd_enc1.transform(gbm1.apply(data_val_1))
+g_t2=grd_enc2.transform(gbm2.apply(data_val_2))
+g_t3=grd_enc3.transform(gbm3.apply(data_val_3))
+
+g_t=sparse.hstack((g_t0,g_t1))
+g_t=sparse.hstack((g_t,g_t2))
+g_t=sparse.hstack((g_t,g_t3))
+
+y_pred_grd_lm = grd_lm.predict_proba(g_t)[:, 1]
+from sklearn.metrics import log_loss
+print(log_loss(labelvv,y_pred_grd_lm))
+#%%
+#%%
+dataset2_1=dataset2_raw.iloc[:,0:70]
+dataset3_1=dataset3_raw.iloc[:,0:70]
+
+dataset2_2=dataset2_raw.iloc[:,70:140]
+dataset3_2=dataset3_raw.iloc[:,70:140]
+
+dataset2_3=dataset2_raw.iloc[:,140:201]
+dataset3_3=dataset3_raw.iloc[:,140:201]
+#%%
+#X_train, X_train_lr, y_train, y_train_lr = train_test_split(dataset1, label1, test_size=0.5)
+#X_test = data_val
+#X_train=dataset1
+#y_train=label1
+#X_train_lr=X_train
+#y_train_lr=y_train
+import lightgbm as lgb
+# 线shang?
+label2=np.array(label2).squeeze()
+gbm = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=8,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm.fit(dataset2,label2)
+#watchlist = [(data_val, labelvv)]#watchlist
+gbm1 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=3,
+                        learning_rate=0.01,
+                        n_estimators=8,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm1.fit(dataset2_1,label2)
+#    eval_set=watchlist,
+#    eval_metric=['binary_logloss'],
+#    early_stopping_rounds= 100)
+gbm2 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=8,
+                        learning_rate=0.01,
+                        n_estimators=7,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm2.fit(dataset2_2,label2)
+#    eval_set=watchlist,
+#    eval_metric=['binary_logloss'],
+#    early_stopping_rounds= 100)
+gbm3 = lgb.LGBMRegressor(objective='binary',
+                        min_child_samples=100,
+                        max_depth=8,
+                        learning_rate=0.01,
+                        n_estimators=7,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
+                        seed=0
+                        )
+gbm3.fit(dataset2_3,label2)
+#    eval_set=watchlist,
+#    eval_metric=['binary_logloss'],
+#    early_stopping_rounds= 100)
+grd_enc=OneHotEncoder()
+grd_enc.fit(gbm.apply(dataset2))
+
+grd_enc1=OneHotEncoder()
+grd_enc1.fit(gbm1.apply(dataset2_1))
+
+grd_enc2=OneHotEncoder()
+grd_enc2.fit(gbm2.apply(dataset2_2))
+
+grd_enc3=OneHotEncoder()
+grd_enc3.fit(gbm3.apply(dataset2_3))
+
+grd_lm = LogisticRegression(random_state=0,verbose=1,max_iter =100)
+
+g0=grd_enc.transform(gbm.apply(dataset2))
+g1=grd_enc1.transform(gbm1.apply(dataset2_1))
+g2=grd_enc2.transform(gbm2.apply(dataset2_2))
+g3=grd_enc3.transform(gbm3.apply(dataset2_3))
+
+g=sparse.hstack((g0,g1))
+g=sparse.hstack((g,g2))
+g=sparse.hstack((g,g3))
+
+grd_lm.fit(g, label2)
+
+g_t0=grd_enc.transform(gbm.apply(dataset3))
+g_t1=grd_enc1.transform(gbm1.apply(dataset3_1))
+g_t2=grd_enc2.transform(gbm2.apply(dataset3_2))
+g_t3=grd_enc3.transform(gbm3.apply(dataset3_3))
+
+g_t=sparse.hstack((g_t0,g_t1))
+g_t=sparse.hstack((g_t,g_t2))
+g_t=sparse.hstack((g_t,g_t3))
+
+y_pred_grd_lm = grd_lm.predict_proba(g_t)[:, 1]
+#%%
+d=test_b[['instance_id']]
+dataset3_pre=test[['instance_id']]
+dataset3_pre['predicted_score']=y_pred_grd_lm
+dataset3_pre=dataset3_pre[dataset3_pre['instance_id'].isin(d['instance_id'])]
+dataset3_pre.to_csv('data/0.0805gb+lr.txt',sep=" ",index=False)
+dataset3_pre.drop_duplicates(inplace=True)
+
 #%%
 dataset1=dataset1.drop(['item_city_id_after','item_brand_id_after'],axis=1)
 dataset2=dataset2.drop(['item_city_id_after','item_brand_id_after'],axis=1)
@@ -116,16 +358,7 @@ dataset2=dataset2.drop(['shop_score_description_after','shop_score_service_del_a
 dataset3=dataset3.drop(['shop_score_description_after','shop_score_service_del_after','shop_score_delivery_del_after','shop_review_positive_rate_after'],axis=1)
 data_val=data_val.drop(['shop_score_description_after','shop_score_service_del_after','shop_score_delivery_del_after','shop_review_positive_rate_after'],axis=1)
 
-#%%
 
-dataset1=dataset1_raw.sample(frac=0.6,axis=1,random_state=666)
-data_val=data_val_raw.sample(frac=0.6,axis=1,random_state=666)#0.0794244
-
-dataset1=dataset1_raw.sample(frac=0.6,axis=1,random_state=111)
-data_val=data_val_raw.sample(frac=0.6,axis=1,random_state=111)#0.0797
-
-dataset1=dataset1_raw.sample(frac=0.6,axis=1,random_state=2018)
-data_val=data_val_raw.sample(frac=0.6,axis=1,random_state=2018)#0.079716
 
 #%%
 dataset1=dataset1.drop('label_user_ith_click',axis=1)

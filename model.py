@@ -20,15 +20,26 @@ from matplotlib import pyplot
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 #%%
-dataset3=pd.read_csv('data/dataset3_add.csv')
-dataset2=pd.read_csv('data/dataset2_add.csv')
-dataset1=pd.read_csv('data/dataset1_add.csv')
-#%%
 dataset3=pd.read_csv('data/dataset3.csv')
 dataset2=pd.read_csv('data/dataset2.csv')
 dataset1=pd.read_csv('data/dataset1.csv')
+dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
+dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)
+dataset3=dataset3.drop(['item_id','shop_id','user_id'],axis=1)
 #%%
 dataset1=dataset1.sample(frac=0.333,random_state=0,replace=True)
+#%%
+dataset1=dataset1.drop(['label_last_click_time_gap'],axis=1)
+dataset2=dataset2.drop(['label_last_click_time_gap'],axis=1)
+dataset3=dataset3.drop(['label_last_click_time_gap'],axis=1)
+#%%
+dataset1=dataset1.drop(['label_user_ith_click'],axis=1)
+dataset2=dataset2.drop(['label_user_ith_click'],axis=1)
+dataset3=dataset3.drop(['label_user_ith_click'],axis=1)
+
+dataset1=dataset1.drop(['label_user_ith_click_normalize'],axis=1)
+dataset2=dataset2.drop(['label_user_ith_click_normalize'],axis=1)
+dataset3=dataset3.drop(['label_user_ith_click_normalize'],axis=1)
 
 #dataset2_pos=dataset2[dataset2['is_trade']==1]
 #dataset2_neg=dataset2[dataset2['is_trade']==0]
@@ -45,7 +56,7 @@ dataset1.drop(['is_trade'],axis=1,inplace=True)
 dataset2.drop(['is_trade'],axis=1,inplace=True)
 dataset1.drop(['instance_id'],axis=1,inplace=True)
 dataset2.drop(['instance_id'],axis=1,inplace=True)
-
+#%%
 le = LabelEncoder()
 dataset1['second_category']=le.fit_transform(dataset1['second_category'])
 dataset2['second_category']=le.fit_transform(dataset2['second_category'])
@@ -64,8 +75,8 @@ dataset3['second_category']=le.fit_transform(dataset3['second_category'])
 #dataset2_neg=dataset2_neg.sample(frac=0.8,random_state=0,replace=True)
 #dataset2=pd.concat([dataset2_pos,dataset2_neg])
 #%%
-watchlist = [(dataset1, label1)]#watchlist
-#watchlist = [(dataset2, label2)]#watchlist
+#watchlist = [(dataset1, label1)]#watchlist
+watchlist = [(dataset2, label2)]#watchlist
 model = xgb.XGBClassifier(
         #objective='rank:pairwise',
         objective='binary:logistic',
@@ -84,8 +95,8 @@ model = xgb.XGBClassifier(
         n_estimators=2000 
         )
 #model.fit(dataset1,label1,eval_set=watchlist)
-model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
-#model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
+#model.fit(dataset2,label2,early_stopping_rounds=200,eval_set=watchlist)#747 1081  929 0.081411  5:989 1108
+model.fit(dataset1,label1,early_stopping_rounds=200,eval_set=watchlist)
 """
 用dataset1训练 测试dataset2 0.0818
 """
@@ -110,7 +121,7 @@ watchlist = [(dataset1, label11)]#watchlist
 #watchlist = [(dataset2, label22)]#watchlist
 
 gbm = lgb.LGBMRegressor(objective='binary',
-                        is_unbalance=True,
+                        #is_unbalance=True,
                         num_leaves=100,
                         learning_rate=0.01,
                         n_estimators=2000,

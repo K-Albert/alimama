@@ -2099,9 +2099,9 @@ user2=user2.drop('user_id',axis=1)
 user3=user3.drop('user_id',axis=1) 
 
 #%%  
-user1.to_csv('data/user1.csv',index=None)
-user2.to_csv('data/user2.csv',index=None)
-user3.to_csv('data/user3.csv',index=None)
+user1.to_csv('data/data/user1.csv',index=None)
+user2.to_csv('data/data/user2.csv',index=None)
+user3.to_csv('data/data/user3.csv',index=None)
 #%%
 shop_feature1=extract_shop_feature(dataset1,feature1_2_3_4_5)
 shop_feature2=extract_shop_feature(dataset2,feature2_3_4_5_6)
@@ -2111,9 +2111,9 @@ shop_feature2=shop_feature2.drop('shop_id',axis=1)
 shop_feature3=shop_feature3.drop('shop_id',axis=1)
 
 #%%
-shop_feature1.to_csv('data/shop_feature1.csv',index=None)
-shop_feature2.to_csv('data/shop_feature2.csv',index=None)
-shop_feature3.to_csv('data/shop_feature3.csv',index=None)
+shop_feature1.to_csv('data/data/shop_feature1.csv',index=None)
+shop_feature2.to_csv('data/data/shop_feature2.csv',index=None)
+shop_feature3.to_csv('data/data/shop_feature3.csv',index=None)
 #%%
 merchant_feature1=extract_label_merchant_feature(dataset1,feature1_2_3_4_5)
 merchant_feature2=extract_label_merchant_feature(dataset2,feature2_3_4_5_6)
@@ -2124,9 +2124,9 @@ merchant_feature2=merchant_feature2.drop('item_id',axis=1)
 merchant_feature3=merchant_feature3.drop('item_id',axis=1)
 
 #%%
-merchant_feature1.to_csv('data/merchant_feature1.csv',index=None)
-merchant_feature2.to_csv('data/merchant_feature2.csv',index=None)
-merchant_feature3.to_csv('data/merchant_feature3.csv',index=None)
+merchant_feature1.to_csv('data/data/merchant_feature1.csv',index=None)
+merchant_feature2.to_csv('data/data/merchant_feature2.csv',index=None)
+merchant_feature3.to_csv('data/data/merchant_feature3.csv',index=None)
 #%%
 other1= extract_other_feature(feature1_2_3_4_5,dataset1)
 other2= extract_other_feature(feature2_3_4_5_6,dataset2)
@@ -2152,75 +2152,75 @@ other1=pd.merge(other1,context_page1,on='context_page_id',how='left')
 other2=pd.merge(other2,context_page2,on='context_page_id',how='left')
 other3=pd.merge(other3,context_page3,on='context_page_id',how='left')
 #%% 
-other1.to_csv('data/other1.csv',index=None)
-other2.to_csv('data/other2.csv',index=None)
-other3.to_csv('data/other3.csv',index=None)
+other1.to_csv('data/data/other1.csv',index=None)
+other2.to_csv('data/data/other2.csv',index=None)
+other3.to_csv('data/data/other3.csv',index=None)
 #%%
 user_merchent1= extract_user_merchant_feature(dataset1,feature1_2_3_4_5)  
 user_merchent2= extract_user_merchant_feature(dataset2,feature2_3_4_5_6)  
 user_merchent3= extract_user_merchant_feature(dataset3,feature3_4_5_6_7)  
 #%%
-user_merchent1.to_csv('data/user_merchant1.csv',index=None) 
-user_merchent2.to_csv('data/user_merchant2.csv',index=None)    
-user_merchent3.to_csv('data/user_merchant3.csv',index=None) 
+user_merchent1.to_csv('data/data/user_merchant1.csv',index=None) 
+user_merchent2.to_csv('data/data/user_merchant2.csv',index=None)    
+user_merchent3.to_csv('data/data/user_merchant3.csv',index=None) 
 #%%    
 user_shop1= extract_user_shop_feature(dataset1,feature1_2_3_4_5)  
 user_shop2= extract_user_shop_feature(dataset2,feature2_3_4_5_6)  
 user_shop3= extract_user_shop_feature(dataset3,feature3_4_5_6_7)  
 #%%
-user_shop1.to_csv('data/user_shop1.csv',index=None) 
-user_shop2.to_csv('data/user_shop2.csv',index=None)    
-user_shop3.to_csv('data/user_shop3.csv',index=None)       
+user_shop1.to_csv('data/data/user_shop1.csv',index=None) 
+user_shop2.to_csv('data/data/user_shop2.csv',index=None)    
+user_shop3.to_csv('data/data/user_shop3.csv',index=None)       
 
 #%%
 hour_related_feature1=extract_hour_relate_feature(dataset1,feature1_2_3_4_5) 
 hour_related_feature2=extract_hour_relate_feature(dataset2,feature2_3_4_5_6) 
 hour_related_feature3=extract_hour_relate_feature(dataset3,feature3_4_5_6_7) 
 #%%
-hour_related_feature1.to_csv('data/hour_related_feature1.csv')
-hour_related_feature2.to_csv('data/hour_related_feature2.csv')
-hour_related_feature3.to_csv('data/hour_related_feature3.csv')     
+hour_related_feature1.to_csv('data/data/hour_related_feature1.csv')
+hour_related_feature2.to_csv('data/data/hour_related_feature2.csv')
+hour_related_feature3.to_csv('data/data/hour_related_feature3.csv')     
 #%%
 label_relate_feature1=extract_label_relate_feature(dataset1,feature1_2_3_4_5)
 label_relate_feature2=extract_label_relate_feature(dataset2,feature2_3_4_5_6)
 label_relate_feature3=extract_label_relate_feature(dataset3,feature3_4_5_6_7)
 #%%
-label_relate_feature1.to_csv('data/label_relate_feature1.csv')
-label_relate_feature2.to_csv('data/label_relate_feature2.csv')
-label_relate_feature3.to_csv('data/label_relate_feature3.csv') 
+label_relate_feature1.to_csv('data/data/label_relate_feature1.csv')
+label_relate_feature2.to_csv('data/data/label_relate_feature2.csv')
+label_relate_feature3.to_csv('data/data/label_relate_feature3.csv') 
 #%%
 #读取
-other1=pd.read_csv('data/other1.csv')
-other2=pd.read_csv('data/other2.csv')
-other3=pd.read_csv('data/other3.csv')
+other1=pd.read_csv('data/data/other1.csv')
+other2=pd.read_csv('data/data/other2.csv')
+other3=pd.read_csv('data/data/other3.csv')
 
-merchant_feature1=pd.read_csv('data/merchant_feature1.csv')
-merchant_feature2=pd.read_csv('data/merchant_feature2.csv')
-merchant_feature3=pd.read_csv('data/merchant_feature3.csv')
+merchant_feature1=pd.read_csv('data/data/merchant_feature1.csv')
+merchant_feature2=pd.read_csv('data/data/merchant_feature2.csv')
+merchant_feature3=pd.read_csv('data/data/merchant_feature3.csv')
 
-shop_feature1=pd.read_csv('data/shop_feature1.csv')
-shop_feature2=pd.read_csv('data/shop_feature2.csv')
-shop_feature3=pd.read_csv('data/shop_feature3.csv')
+shop_feature1=pd.read_csv('data/data/shop_feature1.csv')
+shop_feature2=pd.read_csv('data/data/shop_feature2.csv')
+shop_feature3=pd.read_csv('data/data/shop_feature3.csv')
 
-user1=pd.read_csv('data/user1.csv')
-user2=pd.read_csv('data/user2.csv')
-user3=pd.read_csv('data/user3.csv') 
+user1=pd.read_csv('data/data/user1.csv')
+user2=pd.read_csv('data/data/user2.csv')
+user3=pd.read_csv('data/data/user3.csv') 
 
-user_merchent1=pd.read_csv('data/user_merchant1.csv')   
-user_merchent2=pd.read_csv('data/user_merchant2.csv')   
-user_merchent3=pd.read_csv('data/user_merchant3.csv')   
+user_merchent1=pd.read_csv('data/data/user_merchant1.csv')   
+user_merchent2=pd.read_csv('data/data/user_merchant2.csv')   
+user_merchent3=pd.read_csv('data/data/user_merchant3.csv')   
 
-user_shop1=pd.read_csv('data/user_shop1.csv')   
-user_shop2=pd.read_csv('data/user_shop2.csv')   
-user_shop3=pd.read_csv('data/user_shop3.csv') 
+user_shop1=pd.read_csv('data/data/user_shop1.csv')   
+user_shop2=pd.read_csv('data/data/user_shop2.csv')   
+user_shop3=pd.read_csv('data/data/user_shop3.csv') 
 
-hour_related_feature1=pd.read_csv('data/hour_related_feature1.csv')
-hour_related_feature2=pd.read_csv('data/hour_related_feature2.csv')
-hour_related_feature3=pd.read_csv('data/hour_related_feature3.csv')
+hour_related_feature1=pd.read_csv('data/data/hour_related_feature1.csv')
+hour_related_feature2=pd.read_csv('data/data/hour_related_feature2.csv')
+hour_related_feature3=pd.read_csv('data/data/hour_related_feature3.csv')
 
-label_relate_feature1=pd.read_csv('data/label_relate_feature1.csv')
-label_relate_feature2=pd.read_csv('data/label_relate_feature2.csv')
-label_relate_feature3=pd.read_csv('data/label_relate_feature3.csv')
+label_relate_feature1=pd.read_csv('data/data/label_relate_feature1.csv')
+label_relate_feature2=pd.read_csv('data/data/label_relate_feature2.csv')
+label_relate_feature3=pd.read_csv('data/data/label_relate_feature3.csv')
 #%%
 
 merchant_feature1=merchant_feature1.drop_duplicates()
@@ -2276,9 +2276,9 @@ dataset1=dataset1.drop(['item_id','shop_id','user_id'],axis=1)
 dataset2=dataset2.drop(['item_id','shop_id','user_id'],axis=1)
 dataset3=dataset3.drop(['item_id','shop_id','user_id'],axis=1)
 #%%
-dataset1.to_csv('data/dataset1.csv',index=None)
-dataset2.to_csv('data/dataset2.csv',index=None)
-dataset3.to_csv('data/dataset3.csv',index=None)
+dataset1.to_csv('data/data/dataset1.csv',index=None)
+dataset2.to_csv('data/data/dataset2.csv',index=None)
+dataset3.to_csv('data/data/dataset3.csv',index=None)
 
 
 

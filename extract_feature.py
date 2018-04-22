@@ -22,6 +22,18 @@ test_a = pd.read_csv('data/round1_ijcai_18_test_a_20180301.txt',sep=" ")
 test_b = pd.read_csv('data/round1_ijcai_18_test_b_20180418.txt',sep=" ")
 test=pd.concat([test_a,test_b]).reset_index(drop=True)
 
+data_all=pd.concat([train,test]).reset_index(drop=True)
+feats=np.array(["item_price_level","item_sales_level","item_collected_level","item_pv_level"])
+
+enc_price=OneHotEncoder()
+enc_sales=OneHotEncoder()
+enc_collect=OneHotEncoder()
+enc_pv=OneHotEncoder()
+data_all=data_all.replace(-1,100)
+enc=[enc_price,enc_sales,enc_collect,enc_pv]
+for i,feat in enumerate(feats):
+    d=enc[i].fit_transform(data_all[feat].values.reshape(-1,1))
+
 #from sklearn.linear_model import LogisticRegression
 #enc = OneHotEncoder()
 #a=enc.fit_transform(dataset1['second_category'].values.reshape(-1,1))
@@ -33,26 +45,26 @@ test=pd.concat([test_a,test_b]).reset_index(drop=True)
 #
 #d=pd.get_dummies(dataset1['second_category'])
 
-le = LabelEncoder()
-test['user_id_del']=le.fit_transform(test['user_id'])
-test['shop_id_del']=le.fit_transform(test['shop_id'])
-test['item_id_del']=le.fit_transform(test['item_id'])
-test['item_brand_id_del']=le.fit_transform(test['item_brand_id'])
-test['item_city_id_del']=le.fit_transform(test['item_city_id'])
-test['shop_review_positive_rate_del']=le.fit_transform(test['shop_review_positive_rate'])
-test['shop_score_delivery_del']=le.fit_transform(test['shop_score_delivery'])
-test['shop_score_description_del']=le.fit_transform(test['shop_score_description'])
-test['shop_score_service_del']=le.fit_transform(test['shop_score_service'])
-
-train['user_id_del']=le.fit_transform(train['user_id'])
-train['shop_id_del']=le.fit_transform(train['shop_id'])
-train['item_id_del']=le.fit_transform(train['item_id'])
-train['item_brand_id_del']=le.fit_transform(train['item_brand_id'])
-train['item_city_id_del']=le.fit_transform(train['item_city_id'])
-train['shop_review_positive_rate_del']=le.fit_transform(train['shop_review_positive_rate'])
-train['shop_score_delivery_del']=le.fit_transform(train['shop_score_delivery'])
-train['shop_score_description_del']=le.fit_transform(train['shop_score_description'])
-train['shop_score_service_del']=le.fit_transform(train['shop_score_service'])
+#le = LabelEncoder()
+#test['user_id_del']=le.fit_transform(test['user_id'])
+#test['shop_id_del']=le.fit_transform(test['shop_id'])
+#test['item_id_del']=le.fit_transform(test['item_id'])
+#test['item_brand_id_del']=le.fit_transform(test['item_brand_id'])
+#test['item_city_id_del']=le.fit_transform(test['item_city_id'])
+#test['shop_review_positive_rate_del']=le.fit_transform(test['shop_review_positive_rate'])
+#test['shop_score_delivery_del']=le.fit_transform(test['shop_score_delivery'])
+#test['shop_score_description_del']=le.fit_transform(test['shop_score_description'])
+#test['shop_score_service_del']=le.fit_transform(test['shop_score_service'])
+#
+#train['user_id_del']=le.fit_transform(train['user_id'])
+#train['shop_id_del']=le.fit_transform(train['shop_id'])
+#train['item_id_del']=le.fit_transform(train['item_id'])
+#train['item_brand_id_del']=le.fit_transform(train['item_brand_id'])
+#train['item_city_id_del']=le.fit_transform(train['item_city_id'])
+#train['shop_review_positive_rate_del']=le.fit_transform(train['shop_review_positive_rate'])
+#train['shop_score_delivery_del']=le.fit_transform(train['shop_score_delivery'])
+#train['shop_score_description_del']=le.fit_transform(train['shop_score_description'])
+#train['shop_score_service_del']=le.fit_transform(train['shop_score_service'])
 
 def user_id_map(x):
     if x==0:
@@ -1388,7 +1400,7 @@ def extract_label_merchant_feature(dataset,feature):
     label=pd.merge(label,d31,on='item_property_cnt',how='left')
     
     label=pd.merge(label,d37,on='item_id',how='left')
-    label=label.drop(['item_brand_id','item_city_id'],axis=1)
+#    label=label.drop(['item_brand_id','item_city_id'],axis=1)
     return label
 
 

@@ -19,6 +19,9 @@ from sklearn.metrics import roc_auc_score
 from matplotlib import pyplot
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.preprocessing import LabelEncoder,OneHotEncoder
+from scipy import sparse
 #%%
 dataset5=pd.read_csv('data/dataset5.csv')
 dataset4=pd.read_csv('data/dataset4.csv')
@@ -45,8 +48,44 @@ dataset1_raw.drop(['instance_id'],axis=1,inplace=True)
 dataset2_raw.drop(['instance_id'],axis=1,inplace=True)
 data_val_raw.drop(['instance_id'],axis=1,inplace=True)
 #%%
+#首先将user_id,item_id,item_brand_id,item_city_id,item_price_level,item_sales_level,item_collected_level,item_pv_level,user_id,user_gender_id,user_age_level,user_occupation_id,user_star_level,shop_id,shop_review_num_level,shop_star_level
+feats=np.array(["item_price_level","item_sales_level","item_collected_level","item_pv_level"])
+dataset1_item=dataset1_raw[feats]
+data_val_item=data_val_raw[feats]
 
-le = LabelEncoder()
+dataset1_item=dataset1_item.fillna(-1)
+data_val_item=data_val_item.fillna(-1)
+dataset1_item=dataset1_item.replace(-1,100)
+data_val_item=data_val_item.replace(-1,100)
+
+for i,feat in enumerate(feats):
+    d=enc[i].transform(dataset1_item[feat].values.reshape(-1,1))
+    d1=enc[i].transform(data_val_item[feat].values.reshape(-1,1))
+    if i==0:
+        x_train,x_test=d,d1
+    else:
+        x_train,x_test=sparse.hstack((x_train,d)),sparse.hstack((x_test,d1))
+     
+    
+grd = GradientBoostingClassifier(n_estimators=2,max_depth=2)
+'''使用X_train训练GBDT模型，后面用此模型构造特征'''
+y_train=label1
+grd.fit(x_train, y_train)
+grd_enc=OneHotEncoder()
+# fit one-hot编码器
+grd_enc.fit(grd.apply(x_train)[:, :, 0])
+ddd=grd_enc.transform(grd.apply(x_train)[:, :, 0])
+''' 
+使用训练好的GBDT模型构建特征，然后将特征经过one-hot编码作为新的特征输入到LR模型训练。
+'''
+grd_lm.fit(grd_enc.transform(grd.apply(X_train_lr)[:, :, 0]), y_train_lr)
+# 用训练好的LR模型多X_test做预测
+y_pred_grd_lm = grd_lm.predict_proba(grd_enc.transform(grd.apply(X_test)[:, :, 0]))[:, 1]
+# 根据预测结果输出
+fpr_grd_lm, tpr_grd_lm, _ = roc_curve(y_test, y_pred_grd_lm)
+
+
+
 dataset1_raw['second_category']=le.fit_transform(dataset1_raw['second_category'])
 dataset2_raw['second_category']=le.fit_transform(dataset2_raw['second_category'])
 dataset3_raw['second_category']=le.fit_transform(dataset3_raw['second_category'])
@@ -224,8 +263,8 @@ gbm = lgb.LGBMRegressor(objective='binary',
                         max_depth=3,
                         learning_rate=0.01,
                         n_estimators=4000,
-                        colsample_bytree = 0.5,
-                        subsample = 0.6,
+                        colsample_bytree = 0.9,
+                        subsample = 0.9,
                         seed=0
                         )
 gbm.fit(dataset1,label11,

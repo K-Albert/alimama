@@ -1,0 +1,58 @@
+0  baseline  0:
+0.08141	['label_is_latest_time000', 'shop_user_buy_rate', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  shop_user_buy_rate  0:
+0.081259	['label_is_latest_time000', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  trans_item_id_rate  0:
+0.081183	['label_is_latest_time000', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+
+<class 'type'>
+%------------------------------------------------------------%
+0  baseline  0:
+0.08141	['label_is_latest_time000', 'shop_user_buy_rate', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  shop_user_buy_rate  0:
+0.081259	['label_is_latest_time000', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  trans_item_id_rate  0:
+0.081183	['label_is_latest_time000', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+1  trans_item_id_rate  0:
+0.081176	['label_is_latest_time000', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate']
+reverse  trans_item_brand_id_rate  0:
+0.081102	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate']
+reverse  label_user_look_dif_item  0:
+0.081072	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate']
+
+<class 'type'>
+%------------------------------------------------------------%
+0  baseline  0:
+0.08141	['label_is_latest_time000', 'shop_user_buy_rate', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  shop_user_buy_rate  0:
+0.081259	['label_is_latest_time000', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  trans_item_id_rate  0:
+0.081183	['label_is_latest_time000', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+
+<class 'type'>
+%------------------------------------------------------------%
+0  baseline  0:
+0.08141	['label_is_latest_time000', 'shop_user_buy_rate', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  shop_user_buy_rate  0:
+0.081259	['label_is_latest_time000', 'trans_item_id_rate', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+reverse  trans_item_id_rate  0:
+0.081183	['label_is_latest_time000', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop']
+1  trans_item_id_rate  0:
+0.081176	['label_is_latest_time000', 'label_item_id_has_ever', 'trans_item_brand_id_rate', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate']
+reverse  trans_item_brand_id_rate  0:
+0.081102	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'label_user_look_dif_item', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate']
+reverse  label_user_look_dif_item  0:
+0.081072	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate']
+cross term  label_is_latest_time000+trans_item_id_rate  0:
+0.08104	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate', 'label_is_latest_time000+trans_item_id_rate']
+cross term  label_is_latest_time000-trans_item_id_rate  0:
+0.081014	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate', 'label_is_latest_time000+trans_item_id_rate', 'label_is_latest_time000-trans_item_id_rate']
+cross term  label_is_latest_time000/label_look_dif_shop  0:
+0.081003	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate', 'label_is_latest_time000+trans_item_id_rate', 'label_is_latest_time000-trans_item_id_rate', 'label_is_latest_time000/label_look_dif_shop']
+cross term  label_is_latest_time000*label_look_dif_shop  0:
+0.08092	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate', 'label_is_latest_time000+trans_item_id_rate', 'label_is_latest_time000-trans_item_id_rate', 'label_is_latest_time000/label_look_dif_shop', 'label_is_latest_time000*label_look_dif_shop']
+cross term  label_is_latest_time000*real_hour  0:
+0.080919	['label_is_latest_time000', 'label_item_id_has_ever', 'label_item_brand_has_ever', 'dif_trans_item_sales_level_rate', 'real_hour', 'label_look_dif_shop', 'trans_item_id_rate', 'label_is_latest_time000+trans_item_id_rate', 'label_is_latest_time000-trans_item_id_rate', 'label_is_latest_time000/label_look_dif_shop', 'label_is_latest_time000*label_look_dif_shop', 'label_is_latest_time000*real_hour']
+
+<class 'type'>
+%------------------------------------------------------------%

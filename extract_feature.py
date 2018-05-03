@@ -1447,23 +1447,7 @@ def extract_other_feature(feature,dataset):
     d28=pd.merge(other[['user_id','item_brand_id']],d28,on=['user_id','item_brand_id'],how='left')
     d28=d28.fillna(0)
     d28=d28.drop_duplicates() 
-# 用户  小时  是一天中 后一个小时吗  !!!!!!!!!!!!!!!这里 还要再考虑一下  有没有前提条件 是 当天分两个小时
-    d29=other[['user_id','real_hour']]
-    d30=d29.groupby('user_id').agg('max').reset_index()
-    d30=d30.rename(columns={'real_hour':'real_hour_max'})
-    
-    d29=pd.merge(d29,d30,on='user_id',how='left')
-    d29['label_is_lastest_hour_of_day']=(d29['real_hour']==d29['real_hour_max']).astype('int')
-    d29=d29[['user_id','real_hour','label_is_lastest_hour_of_day']]
-    d29=d29.drop_duplicates()
-    d29=other[['user_id','real_hour']]
-    d30=d29.groupby('user_id').agg('max').reset_index()
-    d30=d30.rename(columns={'real_hour':'real_hour_max'})
-    
-    d29=pd.merge(d29,d30,on='user_id',how='left')
-    d29['label_is_lastest_hour_of_day']=(d29['real_hour']==d29['real_hour_max']).astype('int')
-    d29=d29[['user_id','real_hour','label_is_lastest_hour_of_day']]
-    d29=d29.drop_duplicates()    
+   
 #用户当天  分了好几个小时 浏览   当前是后一个小时
 #    d30=other[['user_id','real_hour']]
 #    d30=d30.drop_duplicates()
@@ -1734,16 +1718,16 @@ def extract_other_feature(feature,dataset):
     other=pd.merge(other,d24,on='item_id',how='left')
     other=pd.merge(other,d26,on=['user_id','item_id'],how='left')
     other=pd.merge(other,d28,on=['user_id','item_brand_id'],how='left')
-    other=pd.merge(other,d29,on=['user_id','real_hour'],how='left')
+#    other=pd.merge(other,d29,on=['user_id','real_hour'],how='left')
 #    other=pd.merge(other,d30,on=['user_id','real_hour'],how='left')
     other=pd.merge(other,d32,on=['user_id','item_city_id'],how='left')
     other=pd.merge(other,d33,on=['user_id','item_brand_id'],how='left')
     other=pd.merge(other,d34,on=['user_id','item_city_id'],how='left')
-    other=pd.merge(other,d35,on='item_id',how='left')
+#    other=pd.merge(other,d35,on='item_id',how='left')
     other=pd.merge(other,d36,on='item_id',how='left')
     
     other=pd.merge(other,d41,on=['user_id','real_time'],how='left')
-    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
+#    other=pd.merge(other,d42,on=['user_id','real_time'],how='left')
 
     other=pd.merge(other,d50,on=['user_id','item_id','real_time'],how='left')
     other=pd.merge(other,d52,on=['user_id','shop_id','real_time'],how='left')
@@ -2249,7 +2233,7 @@ dataset1= pd.merge(dataset1,shop_feature1,on='instance_id',how='left',copy=False
 dataset1= pd.merge(dataset1,user1,on='instance_id',how='left',copy=False)
 dataset1= pd.merge(dataset1,user_merchent1,on='instance_id',how='left',copy=False)
 dataset1= pd.merge(dataset1,user_shop1,on='instance_id',how='left',copy=False)
-dataset1= pd.merge(dataset1,hour_related_feature1,on='instance_id',how='left',copy=False)
+#dataset1= pd.merge(dataset1,hour_related_feature1,on='instance_id',how='left',copy=False)
 dataset1= pd.merge(dataset1,label_relate_feature1,on='instance_id',how='left',copy=False)
 
 dataset2= pd.merge(other2,merchant_feature2,on='instance_id',how='left')
@@ -2257,7 +2241,7 @@ dataset2= pd.merge(dataset2,shop_feature2,on='instance_id',how='left')
 dataset2= pd.merge(dataset2,user2,on='instance_id',how='left')
 dataset2= pd.merge(dataset2,user_merchent2,on='instance_id',how='left')
 dataset2= pd.merge(dataset2,user_shop2,on='instance_id',how='left')
-dataset2= pd.merge(dataset2,hour_related_feature1,on='instance_id',how='left',copy=False)
+#dataset2= pd.merge(dataset2,hour_related_feature1,on='instance_id',how='left',copy=False)
 dataset2= pd.merge(dataset2,label_relate_feature2,on='instance_id',how='left',copy=False)
 
 dataset3= pd.merge(other3,merchant_feature3,on='instance_id',how='left')
@@ -2265,7 +2249,7 @@ dataset3= pd.merge(dataset3,shop_feature3,on='instance_id',how='left')
 dataset3= pd.merge(dataset3,user3,on='instance_id',how='left')
 dataset3= pd.merge(dataset3,user_merchent3,on='instance_id',how='left')
 dataset3= pd.merge(dataset3,user_shop3,on='instance_id',how='left')
-dataset3= pd.merge(dataset3,hour_related_feature3,on='instance_id',how='left',copy=False)
+#dataset3= pd.merge(dataset3,hour_related_feature3,on='instance_id',how='left',copy=False)
 dataset3= pd.merge(dataset3,label_relate_feature3,on='instance_id',how='left',copy=False)
 
 dataset1=dataset1.fillna(value=-1)

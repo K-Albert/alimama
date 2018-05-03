@@ -50,6 +50,10 @@ le = LabelEncoder()
 dataset1['second_category']=le.fit_transform(dataset1['second_category'])
 dataset2['second_category']=le.fit_transform(dataset2['second_category'])
 dataset3['second_category']=le.fit_transform(dataset3['second_category'])
+#%%
+dataset1=dataset1.drop('real_hour',axis=1)
+dataset2=dataset2.drop('real_hour',axis=1)
+dataset3=dataset3.drop('real_hour',axis=1)
 
 #%%
 #dataset1_pos=dataset1[dataset1['is_trade']==1]
@@ -108,7 +112,6 @@ label22=np.array(label2).squeeze()
 label11=np.array(label1).squeeze()
 watchlist = [(dataset1, label11)]#watchlist
 #watchlist = [(dataset2, label22)]#watchlist
-
 gbm = lgb.LGBMRegressor(objective='binary',
                         is_unbalance=True,
                         num_leaves=100,
@@ -118,6 +121,8 @@ gbm = lgb.LGBMRegressor(objective='binary',
                         subsample = 0.9,
                         seed=0
                         )
+gbm= lgb.LGBMClassifier(random_state=1, num_leaves = 6, n_estimators=5000, max_depth=3, learning_rate = 0.05,colsample_bytree = 0.9,subsample = 0.9)
+
 
 #gbm = lgb.LGBMRegressor(objective='binary',
 #                        #num_leaves=60,
@@ -156,9 +161,28 @@ gbm.fit(dataset2,label22,
 from sklearn.metrics import log_loss
 print(log_loss(y_train,y_tt))
 #%%
-feature_importance=pd.Series(gbm.feature_importances_)
-feature_importance.index=dataset2.columns
-#%%
-dataset3_pre['predicted_score']=gbm.predict(dataset3,num_iteration=gbm.best_iteration_)
-dataset3_pre.to_csv('20180415_0.0826_gbm.txt',sep=" ",index=False)
+dataset3_pre['predicted_score']=gbm.predict_proba(dataset3,num_iteration=gbm.best_iteration_)[:,1]
+#dataset3_pre.to_csv('20180415_0.0826_gbm.txt',sep=" ",index=False)
 dataset3_pre.drop_duplicates(inplace=True)
+#%%
+feature_importance=pd.DataFrame(gbm.feature_importances_)
+feature_importance=feature_importance.rename(columns={0:'importance'})
+feature_importance['feature']=dataset2.columns
+feature_importance=feature_importance.sort_values(by = ['importance'],axis = 0,ascending = False).reset_index(drop=True)
+feature_importance_sort=feature_importance.iloc[0:10]
+#%%
+feature=feature_importance_sort.feature
+
+feature=feature.append(pd.Series(['instance_id','is_trade']))
+
+
+dataset1=dataset1[feature]
+dataset2=dataset2[feature]
+dataset3=dataset3[feature_importance_sort.feature]
+
+dataset1.to_csv('data/train/dataset1.csv',index=None)
+dataset2.to_csv('data/train/dataset2.csv',index=None)
+#dataset3.to_csv('data/train/dataset3.csv',index=None)
+
+#baseline 0.0815
+#只取10个特征 0.816817
